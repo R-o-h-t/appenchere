@@ -1,3 +1,9 @@
+type Category @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  Products: [Product] @manyToMany(relationName: "ProductCategory")
+  label: String
+}
+
 type Prices @model @auth(rules: [{allow: public}]) {
   id: ID!
   value: Float
@@ -8,6 +14,7 @@ type Prices @model @auth(rules: [{allow: public}]) {
 type User @model @auth(rules: [{allow: public}]) {
   id: ID!
   Products: [Product] @hasMany(indexName: "byUser", fields: ["id"])
+  AuthId: String
 }
 
 type Product @model @auth(rules: [{allow: public}]) {
@@ -18,4 +25,6 @@ type Product @model @auth(rules: [{allow: public}]) {
   info: String
   startedAt: AWSDateTime
   endedAt: AWSDateTime
+  categories: [Category] @manyToMany(relationName: "ProductCategory")
 }
+ 
