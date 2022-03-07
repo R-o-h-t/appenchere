@@ -4,16 +4,23 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
-// @ts-ignore
-import { Authenticator, withAuthentificator } from "aws-amplify-react-native";
-import Amplify from "aws-amplify";
 
-import awsExport from "./aws-exports";
 import React from "react";
 import { Text } from "react-native";
-Amplify.configure(awsExport);
+import Amplify from "aws-amplify";
+import awsconfig from "./aws-exports";
 
-function App() {
+// @ts-ignore
+import { withAuthenticator } from "aws-amplify-react-native";
+
+Amplify.configure({
+  ...awsconfig,
+  Analytics: {
+    disabled: true,
+  },
+});
+
+const App = () => {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
@@ -27,10 +34,6 @@ function App() {
       </SafeAreaProvider>
     );
   }
-}
+};
 
-export default () => (
-  <Authenticator>
-    <App />
-  </Authenticator>
-);
+export default withAuthenticator(App);

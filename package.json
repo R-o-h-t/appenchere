@@ -14,6 +14,8 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@aws-amplify/auth": "^4.4.2",
+    "@aws-amplify/interactions": "^4.0.33",
     "@expo/vector-icons": "^12.0.0",
     "@react-native-async-storage/async-storage": "^1.16.1",
     "@react-native-community/netinfo": "^8.0.0",
@@ -22,7 +24,7 @@
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.1.0",
     "aws-amplify": "^4.3.14",
-    "aws-amplify-react-native": "^6.0.2",
+    "aws-amplify-react-native": "^6.0.3",
     "expo": "~44.0.0",
     "expo-asset": "~8.4.4",
     "expo-constants": "~13.0.0",
