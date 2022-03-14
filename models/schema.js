@@ -139,6 +139,13 @@ export const schema = {
                         "associatedWith": "product"
                     }
                 },
+                "StartedPrice": {
+                    "name": "StartedPrice",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -429,5 +436,5 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {},
-    "version": "110a3905db44cbad58f00b5ae56b8457"
+    "version": "61eaa51a617aaa9062d19fb94ed3333b"
 };

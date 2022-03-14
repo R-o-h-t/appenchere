@@ -7,14 +7,15 @@ import Navigation from "./navigation";
 
 import React from "react";
 import { Text } from "react-native";
-import Amplify from "aws-amplify";
-import awsconfig from "./aws-exports";
+// @ts-ignore
+import { Amplify } from "aws-amplify";
+import awsExport from "./aws-exports";
 
 // @ts-ignore
 import { withAuthenticator } from "aws-amplify-react-native";
 
 Amplify.configure({
-  ...awsconfig,
+  ...awsExport,
   Analytics: {
     disabled: true,
   },

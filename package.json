@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^4.4.2",
+    "@aws-amplify/datastore": "^3.7.7",
     "@aws-amplify/interactions": "^4.0.33",
     "@expo/vector-icons": "^12.0.0",
     "@react-native-async-storage/async-storage": "^1.16.1",

@@ -26,5 +26,6 @@ type Product @model @auth(rules: [{allow: public}]) {
   startedAt: AWSDateTime
   endedAt: AWSDateTime
   categories: [Category] @manyToMany(relationName: "ProductCategory")
+  StartedPrice: Int
 }
  

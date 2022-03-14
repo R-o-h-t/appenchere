@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "api": {
+      "appenchere": [
+        "Query",
+        "Subscription"
+      ]
+    },
+    "auth": {
+      "appenchere": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}
