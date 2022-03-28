@@ -12,16 +12,17 @@ export default function HomeScreen() {
     }).subscribe(({ items }) => {
       setPriceList(items);
       console.log(items);
+      console.log(items[0].Product);
     });
-    
+
     return () => subscription.unsubscribe();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
       <SafeAreaView style={styles.container}>
         <FlatList
+          style={styles.product_container}
           data={priceList}
           renderItem={({ item }) => <ProductCard price={item} />}
           keyExtractor={(item) => item.id}
@@ -36,14 +37,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+    width: "100%",
   },
   product_container: {
-    width: "100%",
+    marginTop: "20%",
     padding: 5,
+    width: "100%",
+    borderColor: "#555",
+    borderWidth: 1,
+    borderRadius: 5,
   },
 });
