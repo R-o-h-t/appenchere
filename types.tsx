@@ -9,6 +9,7 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Prices } from "./models";
 
 declare global {
   namespace ReactNavigation {
@@ -18,20 +19,26 @@ declare global {
 
 export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  Modal: undefined;
+  Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
 };
 
+export type ModalStackScreenProps<Screen extends keyof ModalStackParamList> =
+    NativeStackScreenProps<ModalStackParamList, Screen>;
+export type ModalStackParamList = {
+  EditProfile: undefined;
+};
+
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
-  NativeStackScreenProps<RootStackParamList, Screen>;
+    NativeStackScreenProps<RootStackParamList, Screen>;
 
 export type RootTabParamList = {
-  TabOne: undefined;
-  TabTwo: undefined;
+  Home: undefined;
+  Profile: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
-  CompositeScreenProps<
-    BottomTabScreenProps<RootTabParamList, Screen>,
-    NativeStackScreenProps<RootStackParamList>
-  >;
+    CompositeScreenProps<
+        BottomTabScreenProps<RootTabParamList, Screen>,
+        NativeStackScreenProps<RootStackParamList>
+        >;

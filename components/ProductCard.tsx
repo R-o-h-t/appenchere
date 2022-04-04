@@ -40,7 +40,10 @@ const ProductCard: React.FC<Props> = ({ price }) => {
       if (price.Product.file)
         Storage.get(price.Product.file, {
           level: "public",
-        }).then((i) => setImage(i));
+        }).then((i) => {
+          setImage(i)
+          console.log(i);
+        }, (e) => console.log(e));
       else setImage("No image");
   }, []);
 
@@ -85,7 +88,7 @@ const ProductCard: React.FC<Props> = ({ price }) => {
             <Text style={styles.text}>{`${price.value}€`}</Text>
           </View>
           <View>
-            <Text style={styles.text}>{`"`}</Text>
+            <Text style={styles.text}>{``}</Text>
           </View>
         </View>
       </View>

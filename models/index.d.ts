@@ -43,7 +43,6 @@ export declare class Product {
   readonly startedAt?: string;
   readonly endedAt?: string;
   readonly categories?: (ProductCategory | null)[];
-  readonly StartedPrice?: number;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   constructor(init: ModelInit<Product, ProductMetaData>);
