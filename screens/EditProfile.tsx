@@ -6,9 +6,6 @@ import {User} from "../models";
 import {Auth} from "@aws-amplify/auth";
 
 
-
-
-
 const EditProfile = async () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');

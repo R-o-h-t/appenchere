@@ -2,59 +2,66 @@ import React from "react";
 import {StyleSheet, View, Text, SafeAreaView} from "react-native";
 import {Avatar, Caption, Title, TouchableRipple} from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {Auth} from "@aws-amplify/auth";
 
 
-export default function ProfileScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-        <View style={styles.userInfoSection}>
-            <View style={{flexDirection: "row", marginTop: 15}}>
-                <Avatar.Image
-                  source={{
-                    uri:
-                      "https://pbs.twimg.com/profile_images/1274002655/avatar_normal.jpg",
-                  }}
-                  size={80}
-                  />
-                <View style={{marginLeft: 20}}>
-                    <Title style={[styles.title, {marginTop: 15, marginBottom: 5, color:"#777777"}]}>Prenom + Nom</Title>
-                    <Caption style={[styles.caption, {color:"#777777"}]}>@username</Caption>
+export default async function ProfileScreen() {
+    const user = await Auth.currentAuthenticatedUser();
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.userInfoSection}>
+                <View style={{flexDirection: "row", marginTop: 15}}>
+                    <Avatar.Image
+                        source={{
+                            uri:
+                                "https://pbs.twimg.com/profile_images/1274002655/avatar_normal.jpg",
+                        }}
+                        size={80}
+                    />
+                    <View style={{marginLeft: 20}}>
+                        <Title style={[styles.title, {
+                            marginTop: 15,
+                            marginBottom: 5,
+                            color: "#777777"
+                        }]}>{`${user.attributes?.given_name} ${user.attributes.family_name}`}</Title>
+                    </View>
                 </View>
             </View>
-        </View>
 
-        <View style={styles.userInfoSection}>
-            <View style={styles.row}>
-                <Icon name="map-marker-radius" color="#777777" size={20} />
-                <Text style={{color:"#777777", marginLeft: 20}}>Toulouse, France</Text>
-            </View>
-            <View style={styles.row}>
-                <Icon name="phone" color="#777777" size={20} />
-                <Text style={{color:"#777777", marginLeft: 20}}>0606060606</Text>
-            </View>
-            <View style={styles.row}>
-                <Icon name="email" color="#777777" size={20} />
-                <Text style={{color:"#777777", marginLeft: 20}}>Test@email.com</Text>
-            </View>
-        </View>
-
-        <View style={styles.menuWrapper}>
-            <TouchableRipple onPress={()=> {}}>
-                <View style={styles.menuItem}>
-                    <Icon name="heart-outline" color="#FF6347" size={25} />
-                    <Text style={styles.menuItemText}>Vos Offres</Text>
+            <View style={styles.userInfoSection}>
+                <View style={styles.row}>
+                    <Icon name="map-marker-radius" color="#777777" size={20}/>
+                    <Text style={{color: "#777777", marginLeft: 20}}>Toulouse, France</Text>
                 </View>
-            </TouchableRipple>
-            <TouchableRipple onPress={()=> {}}>
-                <View style={styles.menuItem}>
-                    <Icon name="book" color="#FF6347" size={25} />
-                    <Text style={styles.menuItemText}>Historique</Text>
+                <View style={styles.row}>
+                    <Icon name="phone" color="#777777" size={20}/>
+                    <Text style={{color: "#777777", marginLeft: 20}}>{user.attributes.phone_number}</Text>
                 </View>
-            </TouchableRipple>
-        </View>
+                <View style={styles.row}>
+                    <Icon name="email" color="#777777" size={20}/>
+                    <Text style={{color: "#777777", marginLeft: 20}}>{user.attributes.email}</Text>
+                </View>
+            </View>
 
-    </SafeAreaView>
-  );
+            <View style={styles.menuWrapper}>
+                <TouchableRipple onPress={() => {
+                }}>
+                    <View style={styles.menuItem}>
+                        <Icon name="heart-outline" color="#FF6347" size={25}/>
+                        <Text style={styles.menuItemText}>Vos Offres</Text>
+                    </View>
+                </TouchableRipple>
+                <TouchableRipple onPress={() => {
+                }}>
+                    <View style={styles.menuItem}>
+                        <Icon name="book" color="#FF6347" size={25}/>
+                        <Text style={styles.menuItemText}>Historique</Text>
+                    </View>
+                </TouchableRipple>
+            </View>
+
+        </SafeAreaView>
+    );
 };
 
 
