@@ -67,6 +67,10 @@ export declare class User {
   readonly id: string;
   readonly Products?: (Product | null)[];
   readonly AuthId?: string;
+  readonly firstname?: string;
+  readonly lastname?: string;
+  readonly email?: string;
+  readonly phone?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   constructor(init: ModelInit<User, UserMetaData>);

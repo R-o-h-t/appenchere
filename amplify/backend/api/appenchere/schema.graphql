@@ -15,6 +15,10 @@ type User @model @auth(rules: [{allow: public}]) {
   id: ID!
   Products: [Product] @hasMany(indexName: "byUser", fields: ["id"])
   AuthId: String
+  firstname: String
+  lastname: String
+  email: String
+  phone: String
 }
 
 type Product @model @auth(rules: [{allow: public}]) {

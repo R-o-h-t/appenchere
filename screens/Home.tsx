@@ -4,7 +4,9 @@ import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import ProductCard from "../components/Product/ProductCard";
 import { Prices } from "../models";
 
-export default function HomeScreen() {
+export default function HomeScreen(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   const [priceList, setPriceList] = React.useState<Prices[]>([]);
   React.useEffect(() => {
     const subscription = DataStore.observeQuery(Prices, Predicates.ALL, {

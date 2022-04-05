@@ -32,9 +32,7 @@
         "usernameAttributes": [
           "EMAIL"
         ],
-        "signupAttributes": [
-          "EMAIL"
-        ],
+        "signupAttributes": [],
         "passwordProtectionSettings": {
           "passwordPolicyMinLength": 8,
           "passwordPolicyCharacters": [

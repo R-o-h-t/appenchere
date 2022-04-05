@@ -2,7 +2,9 @@ import { Auth } from "aws-amplify";
 import React from "react";
 import { StyleSheet, View, Text, Button } from "react-native";
 
-export default function ProfileScreen() {
+export default function ProfileScreen(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>

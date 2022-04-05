@@ -12,15 +12,21 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Auth } from "aws-amplify";
 import * as React from "react";
-import { ColorSchemeName } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ColorSchemeName, View } from "react-native";
 import ProductModal from "../components/Product/ProductModal";
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
+import ConfirmSignUp from "../screens/ConfirmSignUp";
 import Home from "../screens/Home";
 import NotFound from "../screens/NotFound";
 import Profile from "../screens/Profile";
+import SignIn from "../screens/SignIn";
+import SignUp from "../screens/SignUp";
 import {
+  ConnectionStackParamList,
   ModalStackParamList,
   RootStackParamList,
   RootTabParamList,
@@ -33,15 +39,46 @@ export default function Navigation({
 }: {
   colorScheme: ColorSchemeName;
 }) {
+  const [isUserLoggedIn, setUserLoggedIn] = useState<
+    "initializing" | "loggedIn" | "loggedOut"
+  >("initializing");
+  useEffect(() => {
+    checkAuthState();
+  }, []);
+  async function checkAuthState() {
+    try {
+      await Auth.currentAuthenticatedUser();
+      console.log("✅ User is signed in");
+      setUserLoggedIn("loggedIn");
+    } catch (err) {
+      console.log("❌ User is not signed in");
+      setUserLoggedIn("loggedOut");
+    }
+  }
+
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      <RootNavigator />
+      {isUserLoggedIn === "initializing" && <Initializing />}
+      {isUserLoggedIn === "loggedIn" && (
+        <RootNavigator updateAuthState={setUserLoggedIn} />
+      )}
+      {isUserLoggedIn === "loggedOut" && (
+        <AuthenticationNavigator updateAuthState={setUserLoggedIn} />
+      )}
     </NavigationContainer>
   );
 }
+
+const Initializing = () => {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color="tomato" />
+    </View>
+  );
+};
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -49,25 +86,30 @@ export default function Navigation({
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function RootNavigator() {
+function RootNavigator(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Root"
-        component={BottomTabNavigator}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Root" options={{ headerShown: false }}>
+        {(screenProps) => (
+          <BottomTabNavigator
+            {...screenProps}
+            updateAuthState={props.updateAuthState}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen
         name="Modal"
         component={ModalStackNavigator}
         options={{ presentation: "modal" }}
       />
 
-      <Stack.Screen
-        name="NotFound"
-        component={NotFound}
-        options={{ title: "Oops!" }}
-      />
+      <Stack.Screen name="NotFound" options={{ title: "Oops!" }}>
+        {(screenProps) => (
+          <NotFound {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 }
@@ -93,7 +135,9 @@ function ModalStackNavigator() {
  */
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
-function BottomTabNavigator() {
+function BottomTabNavigator(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   const navigation = useNavigation<RootTabParamList>();
   const colorScheme = useColorScheme();
 
@@ -107,23 +151,29 @@ function BottomTabNavigator() {
     >
       <BottomTab.Screen
         name="Home"
-        component={Home}
         options={({ navigation }: RootTabScreenProps<"Home">) => ({
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerShown: false,
           tabBarLabel: "Accueil",
         })}
-      />
+      >
+        {(screenProps) => (
+          <Home {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </BottomTab.Screen>
       <BottomTab.Screen
         name="Profile"
-        component={Profile}
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           tabBarLabel: "Profil",
           headerShown: true,
         }}
-      />
+      >
+        {(screenProps) => (
+          <Profile {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </BottomTab.Screen>
     </BottomTab.Navigator>
   );
 }
@@ -136,4 +186,30 @@ function TabBarIcon(props: {
   color: string;
 }) {
   return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+}
+
+const AuthenticationStack =
+  createNativeStackNavigator<ConnectionStackParamList>();
+function AuthenticationNavigator(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
+  return (
+    <AuthenticationStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <AuthenticationStack.Screen name="SignIn">
+        {(screenProps) => (
+          <SignIn {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </AuthenticationStack.Screen>
+
+      <AuthenticationStack.Screen name="SignUp" component={SignUp} />
+      <AuthenticationStack.Screen
+        name="ConfirmSignUp"
+        component={ConfirmSignUp}
+      />
+    </AuthenticationStack.Navigator>
+  );
 }

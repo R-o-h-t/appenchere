@@ -18,9 +18,19 @@ declare global {
 }
 
 export type RootStackParamList = {
+  Connection: NavigatorScreenParams<ConnectionStackParamList> | undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
+};
+
+export type ConnectionStackScreenProps<
+  Screen extends keyof ConnectionStackParamList
+> = NativeStackScreenProps<ConnectionStackParamList, Screen>;
+export type ConnectionStackParamList = {
+  SignUp: undefined;
+  SignIn: undefined;
+  ConfirmSignUp: undefined;
 };
 
 export type ModalStackScreenProps<Screen extends keyof ModalStackParamList> =
