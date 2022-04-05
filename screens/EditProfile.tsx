@@ -1,60 +1,107 @@
-import React from 'react';
 import {Button, View, Text, StyleSheet, Platform, TextInput, TouchableOpacity} from "react-native";
 import {FontAwesome} from "@expo/vector-icons";
+import React, {useEffect, useState} from "react";
+import {DataStore} from "@aws-amplify/datastore";
+import {User} from "../models";
+import {Auth} from "@aws-amplify/auth";
 
-const EditProfile = () => {
-  return (
-    <View style={styles.container}>
-      <Text>Edit Profile</Text>
 
-        <View style={styles.action}>
-            <FontAwesome name="user-o" color={'#fff'} size={20} />
-            <TextInput
-                placeholder="Nom"
-                placeholderTextColor="#fff"
-                autoCorrect={false}
-                style={styles.textInput}
-            />
-        </View>
-        <View style={styles.action}>
-            <FontAwesome name="user-o" color={'#fff'} size={20} />
-            <TextInput
-                placeholder="Prénom"
-                placeholderTextColor="#fff"
-                autoCorrect={false}
-                style={styles.textInput}
-            />
-        </View>
-        <View style={styles.action}>
-            <FontAwesome name="phone" color={'#fff'} size={20} />
-            <TextInput
-                placeholder="Numeros de téléphone"
-                placeholderTextColor="#fff"
-                keyboardType={'number-pad'}
-                autoCorrect={false}
-                style={styles.textInput}
-            />
-        </View>
-        <View style={styles.action}>
-            <FontAwesome name="envelope-o" color={'#fff'} size={20} />
-            <TextInput
-                placeholder="email"
-                placeholderTextColor="#fff"
-                autoCorrect={false}
-                style={styles.textInput}
-            />
-        </View>
 
-        <TouchableOpacity style={styles.commandButton} onPress={() => {}}>
-            <Text style={styles.panelButtonTitle}>
-                Enregistrer
-            </Text>
-        </TouchableOpacity>
-    </View>
-  );
+
+
+const EditProfile = async () => {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [profile, setUser] = useState<User>();
+    const [isLoading, setIsLoading] = useState(true);
+
+
+    const user = await Auth.currentAuthenticatedUser();
+    React.useEffect(() => {
+        const fetchUser = async () => {
+            return (
+                await DataStore.query(User, (u) => u.AuthId("eq", user.id!))
+            )[0];
+        };
+        fetchUser().then(async (connectedUser) => {
+            if (!connectedUser) {
+                //ERROR
+            } else {
+                setUser(connectedUser);
+            }
+            setIsLoading(false);
+        });
+    }, [user]);
+
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <Text>Edit Profile</Text>
+
+            <View style={styles.action}>
+                <FontAwesome name="user-o" color={'#fff'} size={20}/>
+                <TextInput
+                    placeholder="Nom"
+                    placeholderTextColor="#fff"
+                    autoCorrect={false}
+                    style={styles.textInput}
+                    onChangeText={setLastName}
+                />
+            </View>
+            <View style={styles.action}>
+                <FontAwesome name="user-o" color={'#fff'} size={20}/>
+                <TextInput
+                    placeholder="Prénom"
+                    placeholderTextColor="#fff"
+                    autoCorrect={false}
+                    style={styles.textInput}
+                    onChangeText={setFirstName}
+                />
+            </View>
+            <View style={styles.action}>
+                <FontAwesome name="phone" color={'#fff'} size={20}/>
+                <TextInput
+                    placeholder="Numeros de téléphone"
+                    placeholderTextColor="#fff"
+                    keyboardType={'number-pad'}
+                    autoCorrect={false}
+                    style={styles.textInput}
+                    onChangeText={setPhone}
+                />
+            </View>
+
+            <TouchableOpacity style={styles.commandButton} onPress={() => {
+
+                function editProfile() {
+                    if (!profile) {
+                        return;
+                    }
+                    DataStore.save(
+                        User.copyOf(profile, (updated) => {
+                            updated.firstname = firstName;
+                            updated.lastname = lastName;
+                                updated.phone = phone;
+                        }),
+                    );
+                }
+
+                editProfile();
+            }}>
+                <Text style={styles.panelButtonTitle}>
+                    Enregistrer
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
 };
-
-
 export default EditProfile;
 
 const styles = StyleSheet.create({
