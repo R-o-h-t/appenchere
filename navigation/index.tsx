@@ -6,20 +6,22 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
-  NavigationContainer,
-  DefaultTheme,
   DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { ColorSchemeName, Pressable } from "react-native";
-
+import { ColorSchemeName } from "react-native";
+import ProductModal from "../components/Product/ProductModal";
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-
 import Home from "../screens/Home";
+import NotFound from "../screens/NotFound";
 import Profile from "../screens/Profile";
 import {
+  ModalStackParamList,
   RootStackParamList,
   RootTabParamList,
   RootTabScreenProps,
@@ -56,14 +58,35 @@ function RootNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="Modal"
+        component={ModalStackNavigator}
+        options={{ presentation: "modal" }}
+      />
+
+      <Stack.Screen
         name="NotFound"
-        component={Home}
+        component={NotFound}
         options={{ title: "Oops!" }}
       />
     </Stack.Navigator>
   );
 }
 
+const ModalStack = createNativeStackNavigator<ModalStackParamList>();
+
+function ModalStackNavigator() {
+  return (
+    <ModalStack.Navigator>
+      <ModalStack.Screen
+        name="Product"
+        component={ProductModal}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </ModalStack.Navigator>
+  );
+}
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
  * https://reactnavigation.org/docs/bottom-tab-navigator
@@ -71,32 +94,34 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
+  const navigation = useNavigation<RootTabParamList>();
   const colorScheme = useColorScheme();
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
         headerShown: false,
       }}
     >
       <BottomTab.Screen
-        name="TabOne"
+        name="Home"
         component={Home}
-        options={({ navigation }: RootTabScreenProps<"TabOne">) => ({
+        options={({ navigation }: RootTabScreenProps<"Home">) => ({
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerShown: false,
           tabBarLabel: "Accueil",
         })}
       />
       <BottomTab.Screen
-        name="TabTwo"
+        name="Profile"
         component={Profile}
         options={{
-          title: "Tab Two",
+          title: "Profile",
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          tabBarLabel: "profil",
+          tabBarLabel: "Profil",
+          headerShown: true,
         }}
       />
     </BottomTab.Navigator>

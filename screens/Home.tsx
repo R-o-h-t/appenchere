@@ -1,8 +1,8 @@
-import React from "react";
-import { StyleSheet, View, Text, FlatList, SafeAreaView } from "react-native";
-import ProductCard from "../components/ProductCard";
-import { Prices, Product } from "../models";
 import { DataStore, Predicates } from "@aws-amplify/datastore";
+import React from "react";
+import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
+import ProductCard from "../components/Product/ProductCard";
+import { Prices } from "../models";
 
 export default function HomeScreen() {
   const [priceList, setPriceList] = React.useState<Prices[]>([]);
@@ -11,8 +11,7 @@ export default function HomeScreen() {
       sort: (t) => t.createdAt("DESCENDING"),
     }).subscribe(({ items }) => {
       setPriceList(items);
-      console.log(items);
-      console.log(items[0].Product);
+      console.log("fetched prices", items);
     });
 
     return () => subscription.unsubscribe();

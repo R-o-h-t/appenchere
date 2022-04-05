@@ -1,39 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
-import { Prices, Product } from "../models";
+import { Prices, Product } from "../../models";
 import { Storage } from "aws-amplify";
 import { DateTime } from "luxon";
+import { Chrono } from "./Chrono";
+import { useNavigation } from "@react-navigation/native";
 
 interface Props {
   price: Prices;
 }
 
 const ProductCard: React.FC<Props> = ({ price }) => {
-  const Chrono = () => {
-    if (price.Product && price.Product.startedAt && price.Product.endedAt) {
-      const begin = DateTime.fromISO(price.Product.startedAt);
-      console.log(begin);
-      const end = DateTime.fromISO(price.Product.endedAt);
-      const now = DateTime.now();
-
-      if (begin > now) {
-        return (
-          <Text style={styles.chrono}>
-            {now.diff(begin).toFormat("dd'd'HH'h'mm'm'")}
-          </Text>
-        );
-      } else
-        return (
-          <Text style={styles.chrono}>
-            {now.diff(end).toFormat("dd 'd' hh 'h' mm 'm")}
-          </Text>
-        );
-    }
-    return <Text style={styles.chrono}>blank</Text>;
-  };
-
   const [image, setImage] = React.useState("");
+
+  const navigation = useNavigation();
 
   React.useEffect(() => {
     if (price.Product)
@@ -56,13 +37,16 @@ const ProductCard: React.FC<Props> = ({ price }) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        console.log("clicked");
+        navigation.navigate("Modal", {
+          screen: "Product",
+          params: { price: price },
+        });
       }}
       style={styles.container}
     >
       <View style={styles.img}>
         {image === "" ? (
-          <Text style={styles.text}>Loading...</Text>
+          <Text style={styles.priceText}>Loading...</Text>
         ) : (
           <Image
             style={{
@@ -75,22 +59,35 @@ const ProductCard: React.FC<Props> = ({ price }) => {
         )}
       </View>
       <View style={styles.content}>
-        <View style={styles.label}>
-          <Text style={styles.text}>
-            {price.Product ? price.Product.label : ""}
-          </Text>
-        </View>
-        <View>
-          <View>
-            <Text style={styles.text}>{`${price.value}€`}</Text>
-          </View>
-          <View>
-            <Text style={styles.text}>{`"`}</Text>
+        <View style={styles.upperContent}>
+          <View style={styles.label}>
+            <Text style={styles.titleText}>
+              {price.Product ? price.Product.label : ""}
+            </Text>
           </View>
         </View>
-      </View>
-      <View style={styles.chrono}>
-        <Chrono />
+        <View style={styles.bottomContent}>
+          <View style={styles.price}>
+            <Text style={styles.priceText}>{`${price.value}€`}</Text>
+          </View>
+          <Chrono
+            end={DateTime.fromISO(price.Product?.endedAt!)}
+            begin={DateTime.fromISO(price.Product?.startedAt!)}
+            styles={StyleSheet.create({
+              chrono: {
+                position: "absolute",
+                left: 5,
+                top: 5,
+              },
+              chronoBegin: {
+                color: "green",
+              },
+              chronoEnd: {
+                color: "red",
+              },
+            })}
+          />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -129,11 +126,33 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     flexDirection: "column",
   },
-  label: { borderColor: "#555", borderBottomWidth: 1, width: "100%" },
-  text: {
+  label: {
+    position: "absolute",
+    left: 10,
+    top: 20,
+  },
+  upperContent: {
+    position: "relative",
+    borderColor: "#555",
+    borderBottomWidth: 1,
+    width: "100%",
+    height: "50%",
+  },
+  titleText: {
+    color: "#FFF",
+    fontSize: 20,
+  },
+  priceText: {
     color: "#FFF",
   },
-  chrono: {
-    color: "#FFF",
+  bottomContent: {
+    position: "relative",
+    height: "50%",
+    width: "100%",
+  },
+  price: {
+    position: "absolute",
+    right: 5,
+    bottom: 5,
   },
 });
