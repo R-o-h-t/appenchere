@@ -39,6 +39,7 @@ export type ModalStackParamList = {
   Product: {
     price: Prices;
   };
+  EditProfile: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

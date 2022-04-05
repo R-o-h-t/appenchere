@@ -9,6 +9,7 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  NavigationProp,
   useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -25,6 +26,8 @@ import NotFound from "../screens/NotFound";
 import Profile from "../screens/Profile";
 import SignIn from "../screens/SignIn";
 import SignUp from "../screens/SignUp";
+
+import EditProfile from "../screens/EditProfile";
 import {
   ConnectionStackParamList,
   ModalStackParamList,
@@ -33,6 +36,7 @@ import {
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Navigation({
   colorScheme,
@@ -126,6 +130,13 @@ function ModalStackNavigator() {
           headerShown: false,
         }}
       />
+      <ModalStack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{
+          headerShown: false,
+        }}
+      />
     </ModalStack.Navigator>
   );
 }
@@ -138,7 +149,7 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 function BottomTabNavigator(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
-  const navigation = useNavigation<RootTabParamList>();
+  const navigation = useNavigation();
   const colorScheme = useColorScheme();
 
   return (
@@ -168,6 +179,19 @@ function BottomTabNavigator(props: {
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           tabBarLabel: "Profil",
           headerShown: true,
+          headerTitle: "Profil",
+          headerRight: () => (
+            <MaterialCommunityIcons.Button
+              name="account-edit"
+              size={25}
+              backgroundColor="#000"
+              color="#fff"
+              onPress={() => {
+                console.log("edit");
+                navigation.navigate("Modal", { screen: "EditProfile" });
+              }}
+            />
+          ),
         }}
       >
         {(screenProps) => (
