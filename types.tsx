@@ -18,19 +18,32 @@ declare global {
 }
 
 export type RootStackParamList = {
+  Connection: NavigatorScreenParams<ConnectionStackParamList> | undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
 };
 
+export type ConnectionStackScreenProps<
+  Screen extends keyof ConnectionStackParamList
+> = NativeStackScreenProps<ConnectionStackParamList, Screen>;
+export type ConnectionStackParamList = {
+  SignUp: undefined;
+  SignIn: undefined;
+  ConfirmSignUp: undefined;
+};
+
 export type ModalStackScreenProps<Screen extends keyof ModalStackParamList> =
-    NativeStackScreenProps<ModalStackParamList, Screen>;
+  NativeStackScreenProps<ModalStackParamList, Screen>;
 export type ModalStackParamList = {
+  Product: {
+    price: Prices;
+  };
   EditProfile: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
-    NativeStackScreenProps<RootStackParamList, Screen>;
+  NativeStackScreenProps<RootStackParamList, Screen>;
 
 export type RootTabParamList = {
   Home: undefined;
@@ -38,7 +51,7 @@ export type RootTabParamList = {
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
-    CompositeScreenProps<
-        BottomTabScreenProps<RootTabParamList, Screen>,
-        NativeStackScreenProps<RootStackParamList>
-        >;
+  CompositeScreenProps<
+    BottomTabScreenProps<RootTabParamList, Screen>,
+    NativeStackScreenProps<RootStackParamList>
+  >;

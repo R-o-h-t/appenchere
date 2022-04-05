@@ -1,18 +1,15 @@
+// @ts-ignore
+import { Amplify } from "aws-amplify";
+// @ts-ignore
+import { withAuthenticator } from "aws-amplify-react-native";
 import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+import awsExport from "./aws-exports";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
-
-import React from "react";
-import { Text } from "react-native";
-// @ts-ignore
-import { Amplify } from "aws-amplify";
-import awsExport from "./aws-exports";
-
-// @ts-ignore
-import { withAuthenticator } from "aws-amplify-react-native";
 
 Amplify.configure({
   ...awsExport,
@@ -37,4 +34,4 @@ const App = () => {
   }
 };
 
-export default withAuthenticator(App);
+export default App;
