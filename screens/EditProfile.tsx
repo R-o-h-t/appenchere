@@ -86,6 +86,7 @@ const EditProfile = () => {
             if (!profile) {
               return;
             }
+            console.log(firstName, lastName, phone);
             DataStore.save(
               User.copyOf(profile, (updated) => {
                 updated.firstname = firstName;

@@ -22,6 +22,9 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
+  SignUp: undefined;
+  SignIn: undefined;
+  ConfirmSignUp: undefined;
 };
 
 export type ConnectionStackScreenProps<

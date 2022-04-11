@@ -1,6 +1,7 @@
 import { DataStore, Predicates } from "@aws-amplify/datastore";
 import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
+import AppButton from "../components/AppButton";
 import ProductCard from "../components/Product/ProductCard";
 import { Prices } from "../models";
 
@@ -29,6 +30,10 @@ export default function HomeScreen(props: {
           keyExtractor={(item) => item.id}
         />
       </SafeAreaView>
+      <AppButton
+        onPress={() => props.updateAuthState("loggedOut")}
+        title={"logOut"}
+      />
     </View>
   );
 }

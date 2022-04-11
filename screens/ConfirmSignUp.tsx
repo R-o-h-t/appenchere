@@ -11,8 +11,7 @@ import { ConnectionStackParamList } from "../types";
 export default function ConfirmSignUp() {
   const [username, setUsername] = useState("");
   const [authCode, setAuthCode] = useState("");
-  const navigation =
-    useNavigation<NavigationProp<ConnectionStackParamList, "ConfirmSignUp">>();
+  const navigation = useNavigation();
 
   async function confirmSignUp() {
     Auth.confirmSignUp(username, authCode).then(() =>
@@ -28,7 +27,7 @@ export default function ConfirmSignUp() {
           value={username}
           onChangeText={(text) => setUsername(text)}
           leftIcon="account"
-          placeholder="Enter username"
+          placeholder="Enter email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"

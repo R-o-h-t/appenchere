@@ -12,7 +12,13 @@ export default function ProfileScreen(props: {
 
   useEffect(() => {
     Auth.currentAuthenticatedUser().then((u) => setUser(u));
-  });
+  }, []);
+  if (!user)
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.userInfoSection}>

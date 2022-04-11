@@ -11,8 +11,7 @@ import { ConnectionStackParamList } from "../types";
 export default function SignIn(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
-  const navigation =
-    useNavigation<NavigationProp<ConnectionStackParamList, "SignIn">>();
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

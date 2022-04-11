@@ -17,8 +17,7 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const navigation =
-    useNavigation<NavigationProp<ConnectionStackParamList, "SignUp">>();
+  const navigation = useNavigation();
 
   const handleSubmit = async () => {
     Auth.signUp({
