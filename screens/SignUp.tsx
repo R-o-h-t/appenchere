@@ -17,6 +17,9 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
+
   const navigation = useNavigation();
 
   const handleSubmit = async () => {
@@ -30,20 +33,20 @@ export default function SignUp() {
         family_name: lastName,
       },
     })
-      .then(() => {
+      .then((i) => {
         console.log("Successfully signed up!");
         navigation.navigate("ConfirmSignUp");
         DataStore.save(
           new User({
+            AuthId: i.userSub,
             firstname: firstName,
             lastname: lastName,
             phone: phoneNumber,
+            email: i.user.getUsername(),
           })
         );
       })
-      .catch((err) => {
-        console.log("Error signing up: ", err);
-      });
+      .catch((err) => setErrorMessage(err.message));
   };
 
   return (
@@ -67,7 +70,7 @@ export default function SignUp() {
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry
-          textContentType="password"
+          textContentType="newPassword"
         />
         <AppTextInput
           value={firstName}
@@ -96,8 +99,11 @@ export default function SignUp() {
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
         />
-        <AppButton title="Sign Up" onPress={handleSubmit} />
+        {errorMessage.length > 0 && (
+          <Text style={styles.errorMessageText}>{errorMessage}</Text>
+        )}
         <View style={styles.footerButtonContainer}>
+          <AppButton title="Sign Up" onPress={handleSubmit} />
           <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
             <Text style={styles.forgotPasswordButtonText}>
               Already have an account? Sign In
@@ -117,6 +123,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    marginBlock: "10rem",
+  },
+  errorMessageText: {
+    color: "tomato",
   },
   title: {
     fontSize: 20,
@@ -125,11 +135,16 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   footerButtonContainer: {
-    marginVertical: 15,
+    marginTop: "auto",
     justifyContent: "center",
     alignItems: "center",
   },
   forgotPasswordButtonText: {
+    color: "tomato",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  signUpButtonText: {
     color: "tomato",
     fontSize: 18,
     fontWeight: "600",

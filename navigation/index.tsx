@@ -37,6 +37,7 @@ import {
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Reset from "../screens/Reset";
 
 export default function Navigation({
   colorScheme,
@@ -49,6 +50,7 @@ export default function Navigation({
   useEffect(() => {
     checkAuthState();
   }, []);
+
   async function checkAuthState() {
     try {
       await Auth.currentAuthenticatedUser();
@@ -226,6 +228,12 @@ function AuthenticationNavigator(props: {
       <AuthenticationStack.Screen name="SignIn">
         {(screenProps) => (
           <SignIn {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </AuthenticationStack.Screen>
+
+      <AuthenticationStack.Screen name="Reset">
+        {(screenProps) => (
+          <Reset {...screenProps} updateAuthState={props.updateAuthState} />
         )}
       </AuthenticationStack.Screen>
 

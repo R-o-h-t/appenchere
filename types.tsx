@@ -23,8 +23,13 @@ export type RootStackParamList = {
   Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
   SignUp: undefined;
-  SignIn: undefined;
+  SignIn: {
+    email?: string;
+  };
   ConfirmSignUp: undefined;
+  Reset: {
+    email?: string;
+  };
 };
 
 export type ConnectionStackScreenProps<
@@ -32,8 +37,13 @@ export type ConnectionStackScreenProps<
 > = NativeStackScreenProps<ConnectionStackParamList, Screen>;
 export type ConnectionStackParamList = {
   SignUp: undefined;
-  SignIn: undefined;
+  SignIn: {
+    email?: string;
+  };
   ConfirmSignUp: undefined;
+  Reset: {
+    email: string;
+  };
 };
 
 export type ModalStackScreenProps<Screen extends keyof ModalStackParamList> =

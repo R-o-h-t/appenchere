@@ -11,25 +11,25 @@ import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { DataStore } from "@aws-amplify/datastore";
 import { User } from "../models";
-import { Auth } from "@aws-amplify/auth";
+import { Auth, CognitoUser } from "@aws-amplify/auth";
 
 const EditProfile = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [profile, setUser] = useState<User>();
+  const [profile, setProfile] = useState<User>();
   const [isLoading, setIsLoading] = useState(true);
 
   React.useEffect(() => {
     const fetchUser = async () => {
       const user = await Auth.currentAuthenticatedUser();
-      return (await DataStore.query(User, (u) => u.AuthId("eq", user.id!)))[0];
+      return (await DataStore.query(User, (u) => u.AuthId("eq", user.sub)))[0];
     };
-    fetchUser().then(async (connectedUser) => {
+    fetchUser().then((connectedUser) => {
       if (!connectedUser) {
-        //ERROR
+        //TODO: error
       } else {
-        setUser(connectedUser);
+        setProfile(connectedUser);
       }
       setIsLoading(false);
     });

@@ -10,30 +10,38 @@ import { ConnectionStackParamList } from "../types";
 export default function SignIn(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
+  const route = useRoute<RouteProp<ConnectionStackParamList, "Reset">>();
   const navigation = useNavigation();
-  const route = useRoute<RouteProp<ConnectionStackParamList, "SignIn">>();
 
   const [email, setEmail] = useState("");
+  const [reset, setReset] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
-
   useEffect(() => {
     if (route.params && route.params.email && route.params.email.length > 0) {
       setEmail(route.params.email);
+      Auth.forgotPassword(route.params.email)
+        .then(() => {})
+        .catch((err) => setErrorMessage(err.message));
     }
   }, []);
 
-  async function signIn() {
-    Auth.signIn(email, password)
-      .then(() => props.updateAuthState("loggedIn"))
-      .catch((err) => setErrorMessage(err.message));
+  async function resetPassword() {
+    if (password !== passwordConfirm) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+    Auth.forgotPasswordSubmit(email, reset, password)
+      .then(() => navigation.navigate("SignIn", { email }))
+      .catch((err) => console.log(err));
   }
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>
       <View style={styles.container}>
-        <Text style={styles.title}>Sign in to your account</Text>
+        <Text style={styles.title}>Reset password</Text>
         <AppTextInput
           value={email}
           onChangeText={(text) => setEmail(text)}
@@ -44,6 +52,15 @@ export default function SignIn(props: {
           textContentType="emailAddress"
         />
         <AppTextInput
+          value={reset}
+          onChangeText={(text) => setReset(text)}
+          leftIcon="email"
+          placeholder="Enter reset code"
+          autoCapitalize="none"
+          keyboardType="default"
+          textContentType="oneTimeCode"
+        />
+        <AppTextInput
           value={password}
           onChangeText={(text) => setPassword(text)}
           leftIcon="lock"
@@ -51,27 +68,28 @@ export default function SignIn(props: {
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry
-          textContentType="password"
+          textContentType="newPassword"
+        />
+        <AppTextInput
+          value={passwordConfirm}
+          onChangeText={(text) => setPasswordConfirm(text)}
+          leftIcon="lock"
+          placeholder="Confirm password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry
+          textContentType="newPassword"
         />
         {errorMessage.length > 0 && (
           <Text style={styles.errorMessageText}>{errorMessage}</Text>
         )}
         <View style={styles.footerButtonContainer}>
-          <AppButton title="Login" onPress={signIn} />
+          <AppButton title="Login" onPress={resetPassword} />
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
             <Text style={styles.signUpButtonText}>
               Don't have an account? Sign Up
             </Text>
           </TouchableOpacity>
-          {errorMessage.length > 0 && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Reset", { email })}
-            >
-              <Text style={styles.signUpButtonText}>
-                Forgotten password ? Reset
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
     </SafeAreaView>

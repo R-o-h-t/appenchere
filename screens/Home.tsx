@@ -1,4 +1,5 @@
 import { DataStore, Predicates } from "@aws-amplify/datastore";
+import { Auth } from "aws-amplify";
 import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import AppButton from "../components/AppButton";
@@ -31,7 +32,10 @@ export default function HomeScreen(props: {
         />
       </SafeAreaView>
       <AppButton
-        onPress={() => props.updateAuthState("loggedOut")}
+        onPress={() => {
+          props.updateAuthState("loggedOut");
+          Auth.signOut({ global: true });
+        }}
         title={"logOut"}
       />
     </View>

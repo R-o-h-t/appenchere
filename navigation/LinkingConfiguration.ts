@@ -12,6 +12,7 @@ const linking: LinkingOptions<RootStackParamList> = {
           SignIn: "signin",
           SignUp: "signup",
           ConfirmSignUp: "confirmSignUp",
+          Reset: "reset",
         },
       },
       Root: {
