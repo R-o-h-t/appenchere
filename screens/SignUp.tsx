@@ -30,14 +30,16 @@ export default function SignUp() {
         family_name: lastName,
       },
     })
-      .then(() => {
+      .then((i) => {
         console.log("Successfully signed up!");
         navigation.navigate("ConfirmSignUp");
         DataStore.save(
           new User({
+            AuthId: i.userSub,
             firstname: firstName,
             lastname: lastName,
             phone: phoneNumber,
+            email: username,
           })
         );
       })

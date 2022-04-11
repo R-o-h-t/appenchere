@@ -20,14 +20,44 @@ const EditProfile = () => {
   const [profile, setUser] = useState<User>();
   const [isLoading, setIsLoading] = useState(true);
 
+  async function editProfile() {
+    if (!profile) {
+      return;
+    }
+
+
+    console.log(firstName, lastName, phone);
+    await DataStore.save(
+        User.copyOf(profile, updated => {
+          updated.firstname = firstName;
+          updated.lastname = lastName;
+          updated.phone = phone;
+          if (firstName.trim().length === 0) {
+            updated.firstname = profile?.firstname!
+          }
+          if (!lastName.trim().length) {
+            updated.lastname = profile?.lastname!
+          }
+          if (!phone.trim().length) {
+            updated.phone = profile?.phone!
+          }
+        })
+    ).then(r => {
+      console.log(r, 'r');
+      setIsLoading(false);
+    });
+  }
+
   React.useEffect(() => {
     const fetchUser = async () => {
       const user = await Auth.currentAuthenticatedUser();
-      return (await DataStore.query(User, (u) => u.AuthId("eq", user.id!)))[0];
+      console.log(user);
+      return (await DataStore.query(User, (u) => u.email("eq", user.attributes.email!)))[0];
     };
     fetchUser().then(async (connectedUser) => {
+      console.log(connectedUser, 'connectedUser');
       if (!connectedUser) {
-        //ERROR
+        console.log('connectedUser is undefined');
       } else {
         setUser(connectedUser);
       }
@@ -79,23 +109,13 @@ const EditProfile = () => {
         />
       </View>
 
+
+
+
       <TouchableOpacity
         style={styles.commandButton}
         onPress={() => {
-          function editProfile() {
-            if (!profile) {
-              return;
-            }
-            console.log(firstName, lastName, phone);
-            DataStore.save(
-              User.copyOf(profile, (updated) => {
-                updated.firstname = firstName;
-                updated.lastname = lastName;
-                updated.phone = phone;
-              })
-            );
-          }
-
+          console.log('update user');
           editProfile();
         }}
       >

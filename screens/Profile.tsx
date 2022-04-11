@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, SafeAreaView } from "react-native";
 import { Avatar, Caption, Title, TouchableRipple } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {DataStore} from "@aws-amplify/datastore";
+import {User} from "../models";
 
 export default function ProfileScreen(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
@@ -13,12 +15,31 @@ export default function ProfileScreen(props: {
   useEffect(() => {
     Auth.currentAuthenticatedUser().then((u) => setUser(u));
   }, []);
-  if (!user)
+
+  const [profile, setProfile] = useState<User>();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      const subscription = DataStore.observeQuery(User, (u) =>
+          u.email("eq", user.attributes.email)
+      ).subscribe(({ items }) => {
+        setProfile(items[0]);
+        setIsLoading(false);
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [user]);
+
+  if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
     );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.userInfoSection}>
@@ -39,7 +60,7 @@ export default function ProfileScreen(props: {
                   color: "#777777",
                 },
               ]}
-            >{`${user.attributes?.given_name} ${user.attributes.family_name}`}</Title>
+            >{`${profile?.firstname} ${profile?.lastname}`}</Title>
           </View>
         </View>
       </View>
@@ -54,13 +75,13 @@ export default function ProfileScreen(props: {
         <View style={styles.row}>
           <Icon name="phone" color="#777777" size={20} />
           <Text style={{ color: "#777777", marginLeft: 20 }}>
-            {user.attributes.phone_number}
+            {profile?.phone}
           </Text>
         </View>
         <View style={styles.row}>
           <Icon name="email" color="#777777" size={20} />
           <Text style={{ color: "#777777", marginLeft: 20 }}>
-            {user.attributes.email}
+            {profile?.email}
           </Text>
         </View>
       </View>
