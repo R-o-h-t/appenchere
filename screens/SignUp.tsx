@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Auth, DataStore } from "aws-amplify";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import AppTextInput from "../components/AppTextInput";
 import { User } from "../models";
-import { ConnectionStackParamList } from "../types";
 
 export default function SignUp() {
   //username = email
@@ -104,7 +102,7 @@ export default function SignUp() {
         )}
         <View style={styles.footerButtonContainer}>
           <AppButton title="Sign Up" onPress={handleSubmit} />
-          <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+          <TouchableOpacity onPress={() => navigation.navigate("SignIn", {})}>
             <Text style={styles.forgotPasswordButtonText}>
               Already have an account? Sign In
             </Text>

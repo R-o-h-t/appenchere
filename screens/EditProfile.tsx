@@ -1,17 +1,16 @@
+import { Auth } from "@aws-amplify/auth";
+import { DataStore } from "@aws-amplify/datastore";
+import { FontAwesome } from "@expo/vector-icons";
+import React, { useState } from "react";
 import {
-  Button,
-  View,
-  Text,
-  StyleSheet,
   Platform,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { DataStore } from "@aws-amplify/datastore";
 import { User } from "../models";
-import { Auth, CognitoUser } from "@aws-amplify/auth";
 
 const EditProfile = () => {
   const [firstName, setFirstName] = useState("");
@@ -20,14 +19,45 @@ const EditProfile = () => {
   const [profile, setProfile] = useState<User>();
   const [isLoading, setIsLoading] = useState(true);
 
+  async function editProfile() {
+    if (!profile) {
+      return;
+    }
+
+    console.log(firstName, lastName, phone);
+    await DataStore.save(
+      User.copyOf(profile, (updated) => {
+        updated.firstname = firstName;
+        updated.lastname = lastName;
+        updated.phone = phone;
+        if (firstName.trim().length === 0) {
+          updated.firstname = profile?.firstname!;
+        }
+        if (!lastName.trim().length) {
+          updated.lastname = profile?.lastname!;
+        }
+        if (!phone.trim().length) {
+          updated.phone = profile?.phone!;
+        }
+      })
+    ).then((r) => {
+      console.log(r, "r");
+      setIsLoading(false);
+    });
+  }
+
   React.useEffect(() => {
     const fetchUser = async () => {
       const user = await Auth.currentAuthenticatedUser();
-      return (await DataStore.query(User, (u) => u.AuthId("eq", user.sub)))[0];
+      return (
+        await DataStore.query(User, (u) =>
+          u.email("eq", user.attributes.email!)
+        )
+      )[0];
     };
-    fetchUser().then((connectedUser) => {
+    fetchUser().then(async (connectedUser) => {
       if (!connectedUser) {
-        //TODO: error
+        //TODO error
       } else {
         setProfile(connectedUser);
       }
@@ -82,20 +112,7 @@ const EditProfile = () => {
       <TouchableOpacity
         style={styles.commandButton}
         onPress={() => {
-          function editProfile() {
-            if (!profile) {
-              return;
-            }
-            console.log(firstName, lastName, phone);
-            DataStore.save(
-              User.copyOf(profile, (updated) => {
-                updated.firstname = firstName;
-                updated.lastname = lastName;
-                updated.phone = phone;
-              })
-            );
-          }
-
+          console.log("update user");
           editProfile();
         }}
       >
@@ -114,7 +131,7 @@ const styles = StyleSheet.create({
   commandButton: {
     padding: 15,
     borderRadius: 10,
-    backgroundColor: "#FF6347",
+    backgroundColor: "tomato",
     alignItems: "center",
     marginTop: 10,
   },
@@ -163,7 +180,7 @@ const styles = StyleSheet.create({
   panelButton: {
     padding: 13,
     borderRadius: 10,
-    backgroundColor: "#FF6347",
+    backgroundColor: "tomato",
     alignItems: "center",
     marginVertical: 7,
   },
@@ -184,7 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#FF0000",
+    borderBottomColor: "red",
     paddingBottom: 5,
   },
   textInput: {
