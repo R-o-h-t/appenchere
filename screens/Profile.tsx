@@ -1,14 +1,14 @@
-import React from "react";
+import { NavigationProp, useNavigation } from "@react-navigation/core";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { Avatar, Title, TouchableRipple } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useAuthenticatedUser from "../hooks/useAuthenticatedUser";
+import { ProfileStackParamList } from "../types";
 
-export default function ProfileScreen(props: {
-  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
-}) {
+export default function ProfileScreen() {
   const user = useAuthenticatedUser();
-
+  const navigation =
+    useNavigation<NavigationProp<ProfileStackParamList, "Profile">>();
   if (user === undefined) {
     return (
       <View style={styles.container}>
@@ -60,10 +60,10 @@ export default function ProfileScreen(props: {
       </View>
 
       <View style={styles.menuWrapper}>
-        <TouchableRipple onPress={() => {}}>
+        <TouchableRipple onPress={() => navigation.navigate("CreateOffer")}>
           <View style={styles.menuItem}>
             <Icon name="heart-outline" color="tomato" size={25} />
-            <Text style={styles.menuItemText}>Vos Offres</Text>
+            <Text style={styles.menuItemText}>Mes Images</Text>
           </View>
         </TouchableRipple>
         <TouchableRipple onPress={() => {}}>

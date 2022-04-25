@@ -23,8 +23,11 @@ import userContext from "../contexts/userContext";
 import useColorScheme from "../hooks/useColorScheme";
 import { Product, User } from "../models";
 import ConfirmSignUp from "../screens/ConfirmSignUp";
+import CreateOffer from "../screens/CreateOffer";
+import CreateOffer2 from "../screens/CreateOffer2";
 import EditProfile from "../screens/EditProfile";
 import Home from "../screens/Home";
+import ItemUser from "../screens/ItemUser";
 import NotFound from "../screens/NotFound";
 import Profile from "../screens/Profile";
 import Reset from "../screens/Reset";
@@ -33,6 +36,7 @@ import SignUp from "../screens/SignUp";
 import {
   ConnectionStackParamList,
   ModalStackParamList,
+  ProfileStackParamList,
   RootStackParamList,
   RootTabParamList,
   RootTabScreenProps,
@@ -44,6 +48,7 @@ export default function Navigation({
 }: {
   colorScheme: ColorSchemeName;
 }) {
+  const [product, setProduct] = useState<Product>();
   const [isUserLoggedIn, setUserLoggedIn] = useState<
     "initializing" | "loggedIn" | "loggedOut"
   >("initializing");
@@ -51,7 +56,6 @@ export default function Navigation({
     checkAuthState();
   }, []);
   const [user, setUser] = useState<User>();
-  const [product, setProduct] = useState<Product>();
   const [auth, setAuth] = useState<any>();
 
   useEffect(() => {
@@ -126,6 +130,7 @@ function RootNavigator(props: {
           <BottomTabNavigator
             {...screenProps}
             updateAuthState={props.updateAuthState}
+            updateProduct={props.updateProduct}
           />
         )}
       </Stack.Screen>
@@ -137,6 +142,9 @@ function RootNavigator(props: {
           />
         )}
       </Stack.Screen>
+
+      <Stack.Screen name={"Profile"} component={ProfileStackNavigator} />
+
       <Stack.Screen name="NotFound" options={{ title: "Oops!" }}>
         {(screenProps) => (
           <NotFound {...screenProps} updateAuthState={props.updateAuthState} />
@@ -165,14 +173,68 @@ function ModalStackNavigator(props: { updateProduct: (p: Product) => void }) {
           headerShown: false,
         }}
       />
+      <ModalStack.Screen
+        component={CreateOffer2}
+        name="CreateOffer2"
+        options={{
+          headerShown: false,
+        }}
+      />
     </ModalStack.Navigator>
   );
 }
 
+const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
+
+function ProfileStackNavigator(props: {
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+  updateProduct: (p: Product) => void;
+}) {
+  return (
+    <ProfileStack.Navigator initialRouteName="Profile">
+      <ProfileStack.Screen
+        name="CreateOffer"
+        options={{
+          headerShown: false,
+        }}
+      >
+        {(screenProps) => (
+          <CreateOffer {...screenProps} updateProduct={props.updateProduct} />
+        )}
+      </ProfileStack.Screen>
+      <ProfileStack.Screen
+        name="Profile"
+        options={{
+          headerShown: false,
+        }}
+      >
+        {(screenProps) => (
+          <Profile {...screenProps} updateAuthState={props.updateAuthState} />
+        )}
+      </ProfileStack.Screen>
+      <ProfileStack.Screen
+        name="ItemUser"
+        options={{
+          headerShown: false,
+        }}
+      >
+        {(screenProps) => (
+          <ItemUser {...screenProps} updateProduct={props.updateProduct} />
+        )}
+      </ProfileStack.Screen>
+    </ProfileStack.Navigator>
+  );
+}
+
+/**
+ * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
+ * https://reactnavigation.org/docs/bottom-tab-navigator
+ */
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+  updateProduct: (product: Product) => void;
 }) {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
@@ -219,7 +281,11 @@ function BottomTabNavigator(props: {
         }}
       >
         {(screenProps) => (
-          <Profile {...screenProps} updateAuthState={props.updateAuthState} />
+          <ProfileStackNavigator
+            {...screenProps}
+            updateAuthState={props.updateAuthState}
+            updateProduct={props.updateProduct}
+          />
         )}
       </BottomTab.Screen>
     </BottomTab.Navigator>

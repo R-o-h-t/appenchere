@@ -91,7 +91,7 @@ export default function Reset(props: {
         )}
         <View style={styles.footerButtonContainer}>
           <AppButton title="Login" onPress={resetPassword} />
-          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <TouchableOpacity onPress={() => navigation.navigate("SignUp", {})}>
             <Text style={styles.signUpButtonText}>
               Don't have an account? Sign Up
             </Text>
