@@ -12,13 +12,16 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Auth } from "aws-amplify";
+import { Auth, DataStore } from "aws-amplify";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ColorSchemeName, View } from "react-native";
 import OfferModal from "../components/Product/OfferModal";
 import Colors from "../constants/Colors";
+import productContext from "../contexts/productContext";
+import userContext from "../contexts/userContext";
 import useColorScheme from "../hooks/useColorScheme";
+import { Product, User } from "../models";
 import ConfirmSignUp from "../screens/ConfirmSignUp";
 import EditProfile from "../screens/EditProfile";
 import Home from "../screens/Home";
@@ -47,16 +50,32 @@ export default function Navigation({
   useEffect(() => {
     checkAuthState();
   }, []);
+  const [user, setUser] = useState<User>();
+  const [product, setProduct] = useState<Product>();
+  const [auth, setAuth] = useState<any>();
+
+  useEffect(() => {
+    if (auth) {
+      const subscription = DataStore.observeQuery(User, (u) =>
+        u.email("eq", auth.attributes.email)
+      ).subscribe(({ items }) => {
+        setUser(items[0]);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [auth]);
 
   async function checkAuthState() {
-    try {
-      await Auth.currentAuthenticatedUser();
-      console.log("✅ User is signed in");
-      setUserLoggedIn("loggedIn");
-    } catch (err) {
-      console.log("❌ User is not signed in");
-      setUserLoggedIn("loggedOut");
-    }
+    Auth.currentAuthenticatedUser()
+      .then((u) => {
+        setAuth(u);
+        console.log("✅ User is signed in");
+        setUserLoggedIn("loggedIn");
+      })
+      .catch(() => {
+        console.log("❌ User is not signed in");
+        setUserLoggedIn("loggedOut");
+      });
   }
 
   return (
@@ -65,8 +84,15 @@ export default function Navigation({
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
       {isUserLoggedIn === "initializing" && <Initializing />}
-      {isUserLoggedIn === "loggedIn" && (
-        <RootNavigator updateAuthState={setUserLoggedIn} />
+      {isUserLoggedIn === "loggedIn" && user !== undefined && (
+        <userContext.Provider value={user}>
+          <productContext.Provider value={product}>
+            <RootNavigator
+              updateAuthState={setUserLoggedIn}
+              updateProduct={setProduct}
+            />
+          </productContext.Provider>
+        </userContext.Provider>
       )}
       {isUserLoggedIn === "loggedOut" && (
         <AuthenticationNavigator updateAuthState={setUserLoggedIn} />
@@ -91,6 +117,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+  updateProduct: (p: Product) => void;
 }) {
   return (
     <Stack.Navigator>
@@ -102,11 +129,14 @@ function RootNavigator(props: {
           />
         )}
       </Stack.Screen>
-      <Stack.Screen
-        name="Modal"
-        component={ModalStackNavigator}
-        options={{ presentation: "modal" }}
-      />
+      <Stack.Screen name="Modal" options={{ presentation: "modal" }}>
+        {(screenProps) => (
+          <ModalStackNavigator
+            {...screenProps}
+            updateProduct={props.updateProduct}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="NotFound" options={{ title: "Oops!" }}>
         {(screenProps) => (
           <NotFound {...screenProps} updateAuthState={props.updateAuthState} />
@@ -118,7 +148,7 @@ function RootNavigator(props: {
 
 const ModalStack = createNativeStackNavigator<ModalStackParamList>();
 
-function ModalStackNavigator() {
+function ModalStackNavigator(props: { updateProduct: (p: Product) => void }) {
   return (
     <ModalStack.Navigator>
       <ModalStack.Screen

@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Auth } from "aws-amplify";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { ConnectionStackParamList } from "../types";
 
 export default function ConfirmSignUp() {
@@ -19,6 +24,14 @@ export default function ConfirmSignUp() {
       navigation.navigate("SignIn", { email: username })
     );
   }
+
+  const route = useRoute<RouteProp<ConnectionStackParamList, "SignUp">>();
+
+  useEffect(() => {
+    if (route.params && route.params.email && route.params.email.length > 0) {
+      setUsername(route.params.email);
+    }
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>

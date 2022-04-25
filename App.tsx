@@ -5,12 +5,15 @@ import { StatusBar } from "expo-status-bar";
 import "intl";
 import "intl/locale-data/jsonp/en";
 import _ from "lodash";
-import React from "react";
+import React, { useState } from "react";
 import { LogBox, Text } from "react-native";
+import { Provider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import awsExport from "./aws-exports";
+import productContext from "./contexts/productContext";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
+import { Product } from "./models";
 import Navigation from "./navigation";
 
 LogBox.ignoreLogs(["Warning:..."]); // ignore specific logs
@@ -41,10 +44,12 @@ const App = () => {
     return <Text>Loading...</Text>;
   } else {
     return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </SafeAreaProvider>
+      <Provider>
+        <SafeAreaProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar />
+        </SafeAreaProvider>
+      </Provider>
     );
   }
 };

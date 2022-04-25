@@ -1,8 +1,20 @@
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { Auth, DataStore } from "aws-amplify";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FAB } from "react-native-paper";
+import {
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Badge, Dialog, FAB, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
@@ -25,7 +37,17 @@ export default function SignUp() {
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
+  const [showErrors, setShowErrors] = useState(false);
+
+  const route = useRoute<RouteProp<ConnectionStackParamList, "SignUp">>();
+
+  useEffect(() => {
+    if (route.params && route.params.email && route.params.email.length > 0) {
+      setUsername(route.params.email);
+    }
+  }, []);
 
   useEffect(() => {
     const errors: string[] = [];
@@ -49,7 +71,7 @@ export default function SignUp() {
       if (confirm && password !== confirm) {
         errors.push("Passwords do not match");
       }
-      setErrorMessage(errors.join("\n"));
+      setErrorMessages(errors);
     }
   }, [password, confirm]);
 
@@ -66,28 +88,28 @@ export default function SignUp() {
           phone_number: simplifyPhone(phoneNumber),
           given_name: firstName,
           family_name: lastName,
-          "custom:uid": "",
         },
-      }).then(({ user }) => {
-        console.log("Successfully signed up!");
-        navigation.navigate("ConfirmSignUp", {
-          email: username,
-        });
-        DataStore.save(
-          new User({
-            firstname: firstName,
-            lastname: lastName,
-            phone: phoneNumber,
-            email: user.getUsername(),
-          })
-        ).then(({ id }) => {
-          Auth.updateUserAttributes(user, { "custom:uid": id }).then((e) => {
-            console.log(e);
+      })
+        .then(({ user }) => {
+          console.log("Successfully signed up!");
+          navigation.navigate("ConfirmSignUp", {
+            email: username,
           });
+          DataStore.save(
+            new User({
+              firstname: firstName,
+              lastname: lastName,
+              phone: phoneNumber,
+              email: user.getUsername(),
+            })
+          );
+        })
+        .catch((e) => {
+          setErrorMessages([...e.message]);
+          setShowErrors(true);
         });
-      });
     } else {
-      setErrorMessage("Passwords do not match");
+      setErrorMessages([..."Passwords do not match"]);
     }
   };
 
@@ -161,13 +183,45 @@ export default function SignUp() {
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
         />
-        {errorMessage.length > 0 && (
-          <FAB
-            icon="alert-circle-outline"
-            small
-            style={styles.fab}
-            theme={{ colors: { accent: "tomato" } }}
-          />
+        {errorMessages.length > 0 && (
+          <View style={styles.errorView}>
+            <FAB
+              icon="alert-circle-outline"
+              small
+              style={styles.fab}
+              theme={{ colors: { accent: "tomato" } }}
+              color="white"
+              onPress={() => setShowErrors(true)}
+            />
+            <Badge
+              style={styles.badge}
+              onPressIn={() => {}}
+              onPressOut={() => {}}
+            >
+              {errorMessages.length}
+            </Badge>
+            <Portal>
+              <Dialog
+                visible={showErrors}
+                onDismiss={() => {
+                  setShowErrors(false);
+                }}
+              >
+                <Dialog.Content>
+                  <SafeAreaView>
+                    <FlatList
+                      data={errorMessages}
+                      renderItem={({ item }) => {
+                        return (
+                          <Text style={styles.errorMessageText}> - {item}</Text>
+                        );
+                      }}
+                    />
+                  </SafeAreaView>
+                </Dialog.Content>
+              </Dialog>
+            </Portal>
+          </View>
         )}
         <View style={styles.footerButtonContainer}>
           <AppButton title="Sign Up" onPress={handleSubmit} />
@@ -223,9 +277,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
-  fab: {
+  errorView: {
     position: "absolute",
     top: 8,
     right: 8,
+  },
+  fab: {
+    opacity: 0.9,
+  },
+  badge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "tomato",
+    color: "white",
   },
 });
