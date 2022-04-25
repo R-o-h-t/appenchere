@@ -1,4 +1,9 @@
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { Auth } from "aws-amplify";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -7,11 +12,12 @@ import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
 import { ConnectionStackParamList } from "../types";
 
-export default function SignIn(props: {
+export default function Reset(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
   const route = useRoute<RouteProp<ConnectionStackParamList, "Reset">>();
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NavigationProp<ConnectionStackParamList, "Reset">>();
 
   const [email, setEmail] = useState("");
   const [reset, setReset] = useState("");
@@ -35,7 +41,7 @@ export default function SignIn(props: {
     }
     Auth.forgotPasswordSubmit(email, reset, password)
       .then(() => navigation.navigate("SignIn", { email }))
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   }
 
   return (
@@ -100,18 +106,19 @@ const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
     backgroundColor: "white",
+    paddingVertical: 100,
   },
   container: {
     flex: 1,
     alignItems: "center",
-    marginBlock: "10rem",
+    marginVertical: 10,
   },
   errorMessageText: {
     color: "tomato",
   },
   title: {
     fontSize: 20,
-    color: "#202020",
+    color: "#808080",
     fontWeight: "500",
     marginVertical: 15,
   },

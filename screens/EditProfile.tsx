@@ -24,7 +24,6 @@ const EditProfile = () => {
       return;
     }
 
-    console.log(firstName, lastName, phone);
     await DataStore.save(
       User.copyOf(profile, (updated) => {
         updated.firstname = firstName;
@@ -41,7 +40,6 @@ const EditProfile = () => {
         }
       })
     ).then((r) => {
-      console.log(r, "r");
       setIsLoading(false);
     });
   }
@@ -102,7 +100,7 @@ const EditProfile = () => {
         <TextInput
           placeholder="Numeros de téléphone"
           placeholderTextColor="#fff"
-          keyboardType={"number-pad"}
+          keyboardType={"phone-pad"}
           autoCorrect={false}
           style={styles.textInput}
           onChangeText={setPhone}
@@ -112,7 +110,6 @@ const EditProfile = () => {
       <TouchableOpacity
         style={styles.commandButton}
         onPress={() => {
-          console.log("update user");
           editProfile();
         }}
       >

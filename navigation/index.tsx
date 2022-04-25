@@ -3,13 +3,12 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
-  NavigationProp,
   useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -17,17 +16,17 @@ import { Auth } from "aws-amplify";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ColorSchemeName, View } from "react-native";
-import ProductModal from "../components/Product/ProductModal";
+import OfferModal from "../components/Product/OfferModal";
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 import ConfirmSignUp from "../screens/ConfirmSignUp";
+import EditProfile from "../screens/EditProfile";
 import Home from "../screens/Home";
 import NotFound from "../screens/NotFound";
 import Profile from "../screens/Profile";
+import Reset from "../screens/Reset";
 import SignIn from "../screens/SignIn";
 import SignUp from "../screens/SignUp";
-
-import EditProfile from "../screens/EditProfile";
 import {
   ConnectionStackParamList,
   ModalStackParamList,
@@ -36,8 +35,6 @@ import {
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Reset from "../screens/Reset";
 
 export default function Navigation({
   colorScheme,
@@ -110,7 +107,6 @@ function RootNavigator(props: {
         component={ModalStackNavigator}
         options={{ presentation: "modal" }}
       />
-
       <Stack.Screen name="NotFound" options={{ title: "Oops!" }}>
         {(screenProps) => (
           <NotFound {...screenProps} updateAuthState={props.updateAuthState} />
@@ -127,7 +123,7 @@ function ModalStackNavigator() {
     <ModalStack.Navigator>
       <ModalStack.Screen
         name="Product"
-        component={ProductModal}
+        component={OfferModal}
         options={{
           headerShown: false,
         }}
@@ -142,10 +138,7 @@ function ModalStackNavigator() {
     </ModalStack.Navigator>
   );
 }
-/**
- * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
- * https://reactnavigation.org/docs/bottom-tab-navigator
- */
+
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator(props: {
@@ -189,7 +182,6 @@ function BottomTabNavigator(props: {
               backgroundColor="#000"
               color="#fff"
               onPress={() => {
-                console.log("edit");
                 navigation.navigate("Modal", { screen: "EditProfile" });
               }}
             />

@@ -3,19 +3,22 @@ import { Auth } from "aws-amplify";
 import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import AppButton from "../components/AppButton";
-import ProductCard from "../components/Product/ProductCard";
-import { Prices } from "../models";
+import OfferCard from "../components/Product/OfferCard";
+import { Offer } from "../models";
 
 export default function HomeScreen(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
-  const [priceList, setPriceList] = React.useState<Prices[]>([]);
+  const [offerList, setOfferList] = React.useState<Offer[]>([]);
   React.useEffect(() => {
-    const subscription = DataStore.observeQuery(Prices, Predicates.ALL, {
-      sort: (t) => t.createdAt("DESCENDING"),
-    }).subscribe(({ items }) => {
-      setPriceList(items);
-      console.log("fetched prices", items);
+    const subscription = DataStore.observeQuery(
+      Offer,
+      (o) => o.isPublished("eq", true),
+      {
+        sort: (t) => t.startAt("DESCENDING"),
+      }
+    ).subscribe(({ items }) => {
+      setOfferList(items);
     });
 
     return () => subscription.unsubscribe();
@@ -26,8 +29,8 @@ export default function HomeScreen(props: {
       <SafeAreaView style={styles.container}>
         <FlatList
           style={styles.product_container}
-          data={priceList}
-          renderItem={({ item }) => <ProductCard price={item} />}
+          data={offerList}
+          renderItem={({ item }) => <OfferCard offer={item} />}
           keyExtractor={(item) => item.id}
         />
       </SafeAreaView>
@@ -50,11 +53,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   product_container: {
-    marginTop: "20%",
+    marginTop: "10%",
     padding: 5,
     width: "100%",
-    borderColor: "#555",
-    borderWidth: 1,
-    borderRadius: 5,
   },
 });

@@ -1,35 +1,43 @@
-type Category @model @auth(rules: [{allow: public}]) {
+type Price @model @auth(rules: [{allow: public}]) {
   id: ID!
-  Products: [Product] @manyToMany(relationName: "ProductCategory")
-  label: String
+  value: Int!
+  userID: ID! @index(name: "byUser")
+  offerID: ID! @index(name: "byOffer")
 }
 
-type Prices @model @auth(rules: [{allow: public}]) {
+type Offer @model @auth(rules: [{allow: public}]) {
   id: ID!
-  value: Float
-  Product: Product @hasOne
-  User: User @hasOne
+  startAt: AWSDateTime!
+  endAt: AWSDateTime!
+  userID: ID! @index(name: "byUser")
+  prices: [Price] @hasMany(indexName: "byOffer", fields: ["id"])
+  product: Product @hasOne
+  isPublished: Boolean
+}
+
+type Category @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  label: String!
+  products: [Product] @hasMany(indexName: "byCategory", fields: ["id"])
 }
 
 type User @model @auth(rules: [{allow: public}]) {
   id: ID!
-  Products: [Product] @hasMany(indexName: "byUser", fields: ["id"])
-  AuthId: String
-  firstname: String
-  lastname: String
-  email: String
-  phone: String
+  firstname: String!
+  lastname: String!
+  email: String!
+  phone: String!
+  products: [Product] @hasMany(indexName: "byUser", fields: ["id"])
+  prices: [Price] @hasMany(indexName: "byUser", fields: ["id"])
+  offers: [Offer] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
 type Product @model @auth(rules: [{allow: public}]) {
   id: ID!
-  label: String
-  userID: ID @index(name: "byUser")
-  file: String
-  info: String
-  startedAt: AWSDateTime
-  endedAt: AWSDateTime
-  categories: [Category] @manyToMany(relationName: "ProductCategory")
-  description: String
+  label: String!
+  file: String!
+  description: String!
+  userID: ID! @index(name: "byUser")
+  categoryID: ID! @index(name: "byCategory")
 }
  

@@ -1,51 +1,65 @@
-import React, { useEffect, useState } from "react";
-
-import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
-import { Prices, Product } from "../../models";
-import { Storage } from "aws-amplify";
-import { DateTime } from "luxon";
-import { Chrono } from "./Chrono";
 import { useNavigation } from "@react-navigation/native";
+import { DataStore, Storage } from "aws-amplify";
+import { DateTime } from "luxon";
+import React from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Offer, Price } from "../../models";
+import { Chrono } from "./Chrono";
 
 interface Props {
-  price: Prices;
+  offer: Offer;
 }
 
-const ProductCard: React.FC<Props> = ({ price }) => {
+const OfferCard: React.FC<Props> = ({ offer }) => {
   const [image, setImage] = React.useState("");
+  const [currentPrice, setCurrentPrice] = React.useState<Price>();
+  const [prices, setPrices] = React.useState<Price[]>();
 
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    if (price.Product)
-      if (price.Product.file)
-        Storage.get(price.Product.file, {
-          level: "public",
-        }).then(
-          (i) => {
-            setImage(i);
-            console.log(i);
-          },
-          (e) => console.log(e)
-        );
-      else setImage("No image");
-  }, []);
+    if (offer.product && offer.product.file) {
+      Storage.get(offer.product.file, {
+        level: "public",
+      }).then(
+        (i) => {
+          setImage(i);
+        },
+        (e) => console.error(e)
+      );
+    }
+  }, [offer]);
 
   React.useEffect(() => {
-    if (price.Product)
-      Storage.get(`${price.Product.file}`, {
-        level: "public",
-      }).then((i) => {
-        console.log(i);
-        setImage(i);
-      });
-  }, [price]);
+    if (offer.prices) {
+      setPrices(offer.prices.filter((p) => !!p) as Price[]);
+    } else {
+      DataStore.query(Price, (p) => p.offerID("eq", offer.id)).then((p) =>
+        setPrices(p)
+      );
+    }
+  }, [offer]);
+
+  React.useEffect(() => {
+    if (prices) {
+      setCurrentPrice(
+        prices.reduce((prev, current) => {
+          return !current || prev!.value > current.value ? prev : current;
+        }, new Price({ value: 0, userID: "", offerID: "" })) || undefined
+      );
+    }
+  }, [prices]);
+
   return (
     <TouchableOpacity
       onPress={() => {
         navigation.navigate("Modal", {
           screen: "Product",
-          params: { price: price },
+          params: {
+            offer,
+            image,
+            prices,
+          },
         });
       }}
       style={styles.container}
@@ -68,28 +82,26 @@ const ProductCard: React.FC<Props> = ({ price }) => {
         <View style={styles.upperContent}>
           <View style={styles.label}>
             <Text style={styles.titleText}>
-              {price.Product ? price.Product.label : ""}
+              {offer.product ? offer.product.label : ""}
             </Text>
           </View>
         </View>
         <View style={styles.bottomContent}>
-          <View style={styles.price}>
-            <Text style={styles.priceText}>{`${price.value}€`}</Text>
+          <View style={styles.offer}>
+            <Text style={styles.priceText}>{`${
+              currentPrice ? currentPrice.value : 0
+            }€`}</Text>
           </View>
           <Chrono
-            end={DateTime.fromISO(price.Product?.endedAt!)}
-            begin={DateTime.fromISO(price.Product?.startedAt!)}
+            end={DateTime.fromISO(offer.endAt)}
+            begin={DateTime.fromISO(offer.startAt)}
             styles={StyleSheet.create({
-              chrono: {
-                position: "absolute",
-                left: 5,
-                top: 5,
+              container: {
+                marginVertical: "auto",
+                marginHorizontal: "auto",
               },
-              chronoBegin: {
-                color: "green",
-              },
-              chronoEnd: {
-                color: "red",
+              text: {
+                color: "white",
               },
             })}
           />
@@ -99,7 +111,7 @@ const ProductCard: React.FC<Props> = ({ price }) => {
   );
 };
 
-export default ProductCard;
+export default OfferCard;
 
 const h = 125;
 
@@ -113,7 +125,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#555",
+    elevation: 5,
   },
+
   img: {
     width: h - 12,
     height: h - 12,
@@ -122,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     overflow: "hidden",
     margin: 1,
+    backgroundColor: "#212121",
   },
   content: {
     height: h - 10,
@@ -133,12 +148,11 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   label: {
-    position: "absolute",
-    left: 10,
-    top: 20,
+    marginVertical: "auto",
+    marginRight: "auto",
+    marginLeft: 20,
   },
   upperContent: {
-    position: "relative",
     borderColor: "#555",
     borderBottomWidth: 1,
     width: "100%",
@@ -152,13 +166,13 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   bottomContent: {
-    position: "relative",
     height: "50%",
     width: "100%",
+    position: "relative",
   },
-  price: {
-    position: "absolute",
-    right: 5,
-    bottom: 5,
+  offer: {
+    marginVertical: "auto",
+    marginRight: 20,
+    marginLeft: "auto",
   },
 });

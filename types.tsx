@@ -9,7 +9,7 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Prices } from "./models";
+import { Offer, Price } from "./models";
 
 declare global {
   namespace ReactNavigation {
@@ -22,27 +22,23 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: NavigatorScreenParams<ModalStackParamList> | undefined;
   NotFound: undefined;
-  SignUp: undefined;
-  SignIn: {
-    email?: string;
-  };
-  ConfirmSignUp: undefined;
-  Reset: {
-    email?: string;
-  };
 };
 
 export type ConnectionStackScreenProps<
   Screen extends keyof ConnectionStackParamList
 > = NativeStackScreenProps<ConnectionStackParamList, Screen>;
 export type ConnectionStackParamList = {
-  SignUp: undefined;
+  SignUp: {
+    email?: string;
+  };
   SignIn: {
     email?: string;
   };
-  ConfirmSignUp: undefined;
+  ConfirmSignUp: {
+    email?: string;
+  };
   Reset: {
-    email: string;
+    email?: string;
   };
 };
 
@@ -50,7 +46,9 @@ export type ModalStackScreenProps<Screen extends keyof ModalStackParamList> =
   NativeStackScreenProps<ModalStackParamList, Screen>;
 export type ModalStackParamList = {
   Product: {
-    price: Prices;
+    offer?: Offer;
+    prices?: Price[];
+    image?: string;
   };
   EditProfile: undefined;
 };

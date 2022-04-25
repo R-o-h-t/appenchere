@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3appencherestoragefc0ee81a",
+  "bucketName": "appenchere-storage-fc0ee81a",
+  "policyUUID": "85c89558",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "READ",
+    "CREATE_AND_UPDATE",
+    "DELETE"
+  ]
+}

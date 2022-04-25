@@ -11,11 +11,12 @@ import { ConnectionStackParamList } from "../types";
 export default function ConfirmSignUp() {
   const [username, setUsername] = useState("");
   const [authCode, setAuthCode] = useState("");
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NavigationProp<ConnectionStackParamList, "ConfirmSignUp">>();
 
   async function confirmSignUp() {
     Auth.confirmSignUp(username, authCode).then(() =>
-      navigation.navigate("SignIn")
+      navigation.navigate("SignIn", { email: username })
     );
   }
 
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
     backgroundColor: "white",
+    paddingVertical: 100,
   },
   container: {
     flex: 1,

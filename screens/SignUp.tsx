@@ -1,50 +1,104 @@
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { Auth, DataStore } from "aws-amplify";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FAB } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
 import { User } from "../models";
+import { ConnectionStackParamList } from "../types";
 
 export default function SignUp() {
-  //username = email
+  /**
+   * Auth
+   * username = email
+   */
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  //store these to db
+  const [confirm, setConfirm] = useState("");
+
+  /**
+   * User (DataStore)
+   */
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const navigation = useNavigation();
+  useEffect(() => {
+    const errors: string[] = [];
+
+    if (password) {
+      if (password.length < 8) {
+        errors.push("Password must be at least 8 characters long");
+      }
+      if (!password.match("(?=.*d)")) {
+        errors.push("Password must contain at least one number");
+      }
+      if (!password.match("(?=.*[a-z])")) {
+        errors.push("Password must contain at least one lowercase letter");
+      }
+      if (!password.match("(?=.*[A-Z])")) {
+        errors.push("Password must contain at least one uppercase letter");
+      }
+      if (!password.match("(?=.*[!@#$%^&*])")) {
+        errors.push("Password must contain at least one special character");
+      }
+      if (confirm && password !== confirm) {
+        errors.push("Passwords do not match");
+      }
+      setErrorMessage(errors.join("\n"));
+    }
+  }, [password, confirm]);
+
+  const navigation =
+    useNavigation<NavigationProp<ConnectionStackParamList, "SignUp">>();
 
   const handleSubmit = async () => {
-    Auth.signUp({
-      username,
-      password,
-      attributes: {
-        email: username,
-        phone_number: phoneNumber,
-        given_name: firstName,
-        family_name: lastName,
-      },
-    })
-      .then((i) => {
+    if (password === confirm) {
+      Auth.signUp({
+        username,
+        password,
+        attributes: {
+          email: username,
+          phone_number: simplifyPhone(phoneNumber),
+          given_name: firstName,
+          family_name: lastName,
+          "custom:uid": "",
+        },
+      }).then(({ user }) => {
         console.log("Successfully signed up!");
-        navigation.navigate("ConfirmSignUp");
+        navigation.navigate("ConfirmSignUp", {
+          email: username,
+        });
         DataStore.save(
           new User({
-            AuthId: i.userSub,
             firstname: firstName,
             lastname: lastName,
             phone: phoneNumber,
-            email: i.user.getUsername(),
+            email: user.getUsername(),
           })
-        );
-      })
-      .catch((err) => setErrorMessage(err.message));
+        ).then(({ id }) => {
+          Auth.updateUserAttributes(user, { "custom:uid": id }).then((e) => {
+            console.log(e);
+          });
+        });
+      });
+    } else {
+      setErrorMessage("Passwords do not match");
+    }
+  };
+
+  const simplifyPhone = (phone: string) => {
+    if (phone.slice(0, 2).includes("+")) {
+      return phone;
+    } else if (phone.slice(0, 2).includes("00")) {
+      return `+${phone.substring(2)}`;
+    } else if (phone.slice(0, 1).includes("0")) {
+      return `+33${phone.substring(1)}`;
+    }
   };
 
   return (
@@ -65,6 +119,16 @@ export default function SignUp() {
           onChangeText={(text) => setPassword(text)}
           leftIcon="lock"
           placeholder="Enter password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry
+          textContentType="newPassword"
+        />
+        <AppTextInput
+          value={confirm}
+          onChangeText={(text) => setConfirm(text)}
+          leftIcon="lock"
+          placeholder="Confirm password"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry
@@ -98,11 +162,22 @@ export default function SignUp() {
           textContentType="telephoneNumber"
         />
         {errorMessage.length > 0 && (
-          <Text style={styles.errorMessageText}>{errorMessage}</Text>
+          <FAB
+            icon="alert-circle-outline"
+            small
+            style={styles.fab}
+            theme={{ colors: { accent: "tomato" } }}
+          />
         )}
         <View style={styles.footerButtonContainer}>
           <AppButton title="Sign Up" onPress={handleSubmit} />
-          <TouchableOpacity onPress={() => navigation.navigate("SignIn", {})}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("SignIn", {
+                email: username,
+              })
+            }
+          >
             <Text style={styles.forgotPasswordButtonText}>
               Already have an account? Sign In
             </Text>
@@ -117,25 +192,26 @@ const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
     backgroundColor: "white",
+    paddingVertical: 20,
   },
   container: {
     flex: 1,
     alignItems: "center",
-    marginBlock: "10rem",
+    marginVertical: 20,
   },
   errorMessageText: {
     color: "tomato",
   },
   title: {
     fontSize: 20,
-    color: "#202020",
+    color: "#808080",
     fontWeight: "500",
     marginVertical: 15,
   },
   footerButtonContainer: {
     marginTop: "auto",
-    justifyContent: "center",
     alignItems: "center",
+    width: "100%",
   },
   forgotPasswordButtonText: {
     color: "tomato",
@@ -146,5 +222,10 @@ const styles = StyleSheet.create({
     color: "tomato",
     fontSize: 18,
     fontWeight: "600",
+  },
+  fab: {
+    position: "absolute",
+    top: 8,
+    right: 8,
   },
 });
