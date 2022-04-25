@@ -40,6 +40,8 @@ const ProductCard: React.FC<Props> = ({ price }) => {
         setImage(i);
       });
   }, [price]);
+
+
   return (
     <TouchableOpacity
       onPress={() => {

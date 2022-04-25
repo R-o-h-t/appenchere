@@ -25,6 +25,8 @@ const linking: LinkingOptions<RootStackParamList> = {
           Profile: {
             screens: {
               Profile: "profile",
+              CreateOffer: "create-offer",
+              ItemUser: "item-user",
             },
           },
         },
@@ -33,6 +35,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           Product: "product",
           EditProfile: "edit-profile",
+          CreateOffer2: "create-offer2",
         },
       },
       NotFound: "*",

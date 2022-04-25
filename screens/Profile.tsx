@@ -1,16 +1,20 @@
 import { Auth } from "aws-amplify";
 import React, { useEffect, useState } from "react";
-
 import { StyleSheet, View, Text, SafeAreaView } from "react-native";
 import { Avatar, Caption, Title, TouchableRipple } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { DataStore } from "@aws-amplify/datastore";
 import { User } from "../models";
+import CreateOffer from "./CreateOffer";
+import {NavigationProp, useNavigation} from "@react-navigation/native";
+import {ProfileStackParamList} from "../types";
+
 
 export default function ProfileScreen(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
   const [user, setUser] = useState<any>();
+  const navigation = useNavigation<NavigationProp<ProfileStackParamList, "Profile">>();
 
   useEffect(() => {
     Auth.currentAuthenticatedUser().then((u) => setUser(u));
@@ -87,10 +91,10 @@ export default function ProfileScreen(props: {
       </View>
 
       <View style={styles.menuWrapper}>
-        <TouchableRipple onPress={() => {}}>
+        <TouchableRipple onPress={() => navigation.navigate("CreateOffer")}>
           <View style={styles.menuItem}>
             <Icon name="heart-outline" color="tomato" size={25} />
-            <Text style={styles.menuItemText}>Vos Offres</Text>
+            <Text style={styles.menuItemText}>Mes Images</Text>
           </View>
         </TouchableRipple>
         <TouchableRipple onPress={() => {}}>

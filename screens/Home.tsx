@@ -4,18 +4,17 @@ import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import AppButton from "../components/AppButton";
 import ProductCard from "../components/Product/ProductCard";
-import { Prices } from "../models";
+import { Price } from "../models";
 
 export default function HomeScreen(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
-  const [priceList, setPriceList] = React.useState<Prices[]>([]);
+  const [priceList, setPriceList] = React.useState<Price[]>([]);
   React.useEffect(() => {
-    const subscription = DataStore.observeQuery(Prices, Predicates.ALL, {
+    const subscription = DataStore.observeQuery(Price, Predicates.ALL, {
       sort: (t) => t.createdAt("DESCENDING"),
     }).subscribe(({ items }) => {
       setPriceList(items);
-      console.log("fetched prices", items);
     });
 
     return () => subscription.unsubscribe();

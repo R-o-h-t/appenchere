@@ -1,5 +1,5 @@
 // @ts-ignore
-import { Amplify } from "aws-amplify";
+import {Amplify, DataStore} from "aws-amplify";
 // @ts-ignore
 import { withAuthenticator } from "aws-amplify-react-native";
 import { StatusBar } from "expo-status-bar";
@@ -22,6 +22,7 @@ const App = () => {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
+
   if (!isLoadingComplete) {
     return <Text>Loading...</Text>;
   } else {
@@ -35,3 +36,4 @@ const App = () => {
 };
 
 export default App;
+

@@ -102,7 +102,7 @@ const EditProfile = () => {
         <TextInput
           placeholder="Numeros de téléphone"
           placeholderTextColor="#fff"
-          keyboardType={"number-pad"}
+          keyboardType={"phone-pad"}
           autoCorrect={false}
           style={styles.textInput}
           onChangeText={setPhone}

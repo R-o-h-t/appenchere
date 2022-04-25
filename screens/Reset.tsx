@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    marginBlock: "10rem",
   },
   errorMessageText: {
     color: "tomato",
