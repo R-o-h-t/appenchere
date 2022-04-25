@@ -10,16 +10,20 @@ import { Chrono } from "./Chrono";
 
 interface Props {
   offer: Offer;
+  updateOffer: (o: {
+    offer: Offer;
+    image: string;
+    prices: Price[];
+    currentPrice: Price;
+  }) => void;
 }
 
-const OfferCard: React.FC<Props> = ({ offer }) => {
+const OfferCard: React.FC<Props> = ({ offer, updateOffer }) => {
   const [image, setImage] = React.useState("");
   const [currentPrice, setCurrentPrice] = React.useState<Price>();
   const [prices, setPrices] = React.useState<Price[]>();
   const [product, setProduct] = React.useState<Product>();
   const navigation = useNavigation();
-
-  const [imageAsLoad, setImageAsLoad] = React.useState(false);
 
   React.useEffect(() => {
     if (offer && offer.offerProductId !== undefined) {
@@ -42,15 +46,16 @@ const OfferCard: React.FC<Props> = ({ offer }) => {
         (e) => console.error(e)
       );
     }
-  }, [offer]);
+  }, [product]);
 
   React.useEffect(() => {
     if (offer.prices) {
       setPrices(offer.prices.filter((p) => !!p) as Price[]);
     } else {
-      DataStore.query(Price, (p) => p.offerID("eq", offer.id)).then((p) =>
-        setPrices(p)
-      );
+      const sub = DataStore.observeQuery(Price, (p) =>
+        p.offerID("eq", offer.id)
+      ).subscribe(({ items }) => setPrices(items));
+      return () => sub.unsubscribe();
     }
   }, [offer]);
 
@@ -71,77 +76,67 @@ const OfferCard: React.FC<Props> = ({ offer }) => {
     offer === undefined ||
     product === undefined
   ) {
-    console.log(currentPrice, prices, image, offer, product);
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { alignItems: "center" }]}>
         <ActivityIndicator animating={true} color="tomato" />
       </View>
     );
-  }
-  return (
-    <offerContext.Provider value={{ offer, currentPrice, prices }}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Modal", {
-            screen: "Product",
-            params: {
-              offer,
-              image,
-              prices,
-            },
-          });
-        }}
-        style={styles.container}
-      >
-        <View style={styles.img}>
-          {!imageAsLoad ? (
-            <ActivityIndicator animating={true} color="tomato" />
-          ) : (
+  } else {
+    return (
+      <offerContext.Provider value={{ offer, currentPrice, prices, image }}>
+        <TouchableOpacity
+          onPress={() => {
+            updateOffer({ offer, currentPrice, prices, image });
+            navigation.navigate("Modal", {
+              screen: "Product",
+              params: {},
+            });
+          }}
+          style={styles.container}
+        >
+          <View style={styles.img}>
             <Image
               style={{
                 width: h,
                 height: h,
                 resizeMode: "contain",
               }}
-              onLoadEnd={() => {
-                setImageAsLoad(true);
-              }}
               source={{ uri: image }}
             />
-          )}
-        </View>
-        <View style={styles.content}>
-          <View style={styles.upperContent}>
-            <View style={styles.label}>
-              <Text style={styles.titleText}>
-                {product ? product.label : ""}
-              </Text>
+          </View>
+          <View style={styles.content}>
+            <View style={styles.upperContent}>
+              <View style={styles.label}>
+                <Text style={styles.titleText}>
+                  {product ? product.label : ""}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.bottomContent}>
+              <View style={styles.offer}>
+                <Text style={styles.priceText}>{`${
+                  currentPrice ? currentPrice.value : 0
+                }€`}</Text>
+              </View>
+              <Chrono
+                end={DateTime.fromISO(offer.startAt)}
+                begin={DateTime.fromISO(offer.endAt)}
+                styles={StyleSheet.create({
+                  container: {
+                    marginVertical: "auto",
+                    marginHorizontal: "auto",
+                  },
+                  text: {
+                    color: "white",
+                  },
+                })}
+              />
             </View>
           </View>
-          <View style={styles.bottomContent}>
-            <View style={styles.offer}>
-              <Text style={styles.priceText}>{`${
-                currentPrice ? currentPrice.value : 0
-              }€`}</Text>
-            </View>
-            <Chrono
-              end={DateTime.fromISO(offer.startAt)}
-              begin={DateTime.fromISO(offer.endAt)}
-              styles={StyleSheet.create({
-                container: {
-                  marginVertical: "auto",
-                  marginHorizontal: "auto",
-                },
-                text: {
-                  color: "white",
-                },
-              })}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
-    </offerContext.Provider>
-  );
+        </TouchableOpacity>
+      </offerContext.Provider>
+    );
+  }
 };
 
 export default OfferCard;

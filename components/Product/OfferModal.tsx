@@ -1,6 +1,5 @@
-import { RouteProp, useRoute } from "@react-navigation/native";
 import { DataStore } from "aws-amplify";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -11,16 +10,14 @@ import {
   View,
 } from "react-native";
 import { FAB } from "react-native-paper";
+import offerContext from "../../contexts/offerContext";
 import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
-import { Price, Product, User } from "../../models";
-import { ModalStackParamList } from "../../types";
+import { Product, User } from "../../models";
 import JoinOfferDialog from "../Dialog/JoinOfferDialog";
 
 export default function OfferModal() {
-  const route = useRoute<RouteProp<ModalStackParamList, "Product">>();
-  const { offer, image, prices } = route.params;
+  const { offer, image, prices, currentPrice } = useContext(offerContext);
 
-  const [currentPrice, setCurrentPrice] = useState<Price>();
   const [currentUser, setCurrentUser] = useState<User>();
   const [author, setAuthor] = useState<User>();
   const user = useAuthenticatedUser();
@@ -44,20 +41,10 @@ export default function OfferModal() {
       DataStore.query(Product, (p) => p.id("eq", offer.offerProductId!)).then(
         (item) => {
           setProduct(item[0]);
-          console.log("product:", item[0]);
         }
       );
     }
   }, [offer]);
-
-  React.useEffect(() => {
-    if (prices)
-      setCurrentPrice(
-        prices.reduce((prev, current) => {
-          return !current || prev!.value > current.value ? prev : current;
-        }, new Price({ value: 0, userID: "", offerID: "" })) || undefined
-      );
-  }, [prices]);
 
   React.useEffect(() => {
     if (currentPrice) {
@@ -114,7 +101,7 @@ export default function OfferModal() {
       </SafeAreaView>
       {currentUser && user && user.email === currentUser.email ? (
         <>
-          {author && author.email !== user.email ? (
+          {author && author.email === user.email ? (
             <FAB
               style={styles.fab}
               accessibilityLabel="participer a l'offre"

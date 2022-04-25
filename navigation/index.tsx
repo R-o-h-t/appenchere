@@ -18,10 +18,11 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ColorSchemeName, View } from "react-native";
 import OfferModal from "../components/Product/OfferModal";
 import Colors from "../constants/Colors";
+import offerContext from "../contexts/offerContext";
 import productContext from "../contexts/productContext";
 import userContext from "../contexts/userContext";
 import useColorScheme from "../hooks/useColorScheme";
-import { Product, User } from "../models";
+import { Offer, Price, Product, User } from "../models";
 import ConfirmSignUp from "../screens/ConfirmSignUp";
 import CreateOffer from "../screens/CreateOffer";
 import CreateOffer2 from "../screens/CreateOffer2";
@@ -49,6 +50,13 @@ export default function Navigation({
   colorScheme: ColorSchemeName;
 }) {
   const [product, setProduct] = useState<Product>();
+  const [offer, setOffer] = useState<{
+    offer?: Offer;
+    image?: string;
+    currentPrice?: Price;
+    prices?: Price[];
+  }>({});
+
   const [isUserLoggedIn, setUserLoggedIn] = useState<
     "initializing" | "loggedIn" | "loggedOut"
   >("initializing");
@@ -91,10 +99,13 @@ export default function Navigation({
       {isUserLoggedIn === "loggedIn" && user !== undefined && (
         <userContext.Provider value={user}>
           <productContext.Provider value={product}>
-            <RootNavigator
-              updateAuthState={setUserLoggedIn}
-              updateProduct={setProduct}
-            />
+            <offerContext.Provider value={offer}>
+              <RootNavigator
+                updateAuthState={setUserLoggedIn}
+                updateProduct={setProduct}
+                updateOffer={setOffer}
+              />
+            </offerContext.Provider>
           </productContext.Provider>
         </userContext.Provider>
       )}
@@ -122,6 +133,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
   updateProduct: (p: Product) => void;
+  updateOffer: (o: {
+    offer?: Offer;
+    image?: string;
+    currentPrice?: Price;
+  }) => void;
 }) {
   return (
     <Stack.Navigator>
@@ -131,6 +147,7 @@ function RootNavigator(props: {
             {...screenProps}
             updateAuthState={props.updateAuthState}
             updateProduct={props.updateProduct}
+            updateOffer={props.updateOffer}
           />
         )}
       </Stack.Screen>
@@ -139,6 +156,7 @@ function RootNavigator(props: {
           <ModalStackNavigator
             {...screenProps}
             updateProduct={props.updateProduct}
+            updateOffer={props.updateOffer}
           />
         )}
       </Stack.Screen>
@@ -156,7 +174,14 @@ function RootNavigator(props: {
 
 const ModalStack = createNativeStackNavigator<ModalStackParamList>();
 
-function ModalStackNavigator(props: { updateProduct: (p: Product) => void }) {
+function ModalStackNavigator(props: {
+  updateProduct: (p: Product) => void;
+  updateOffer: (o: {
+    offer?: Offer;
+    image?: string;
+    currentPrice?: Price;
+  }) => void;
+}) {
   return (
     <ModalStack.Navigator>
       <ModalStack.Screen
@@ -203,15 +228,12 @@ function ProfileStackNavigator(props: {
         )}
       </ProfileStack.Screen>
       <ProfileStack.Screen
+        component={Profile}
         name="Profile"
         options={{
           headerShown: false,
         }}
-      >
-        {(screenProps) => (
-          <Profile {...screenProps} updateAuthState={props.updateAuthState} />
-        )}
-      </ProfileStack.Screen>
+      />
       <ProfileStack.Screen
         name="ItemUser"
         options={{
@@ -235,6 +257,11 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 function BottomTabNavigator(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
   updateProduct: (product: Product) => void;
+  updateOffer: (o: {
+    offer?: Offer;
+    image?: string;
+    currentPrice?: Price;
+  }) => void;
 }) {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
@@ -256,7 +283,11 @@ function BottomTabNavigator(props: {
         })}
       >
         {(screenProps) => (
-          <Home {...screenProps} updateAuthState={props.updateAuthState} />
+          <Home
+            {...screenProps}
+            updateAuthState={props.updateAuthState}
+            updateOffer={props.updateOffer}
+          />
         )}
       </BottomTab.Screen>
       <BottomTab.Screen

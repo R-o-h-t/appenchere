@@ -4,10 +4,16 @@ import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import AppButton from "../components/AppButton";
 import OfferCard from "../components/Product/OfferCard";
-import { Offer } from "../models";
+import { Offer, Price } from "../models";
 
 export default function HomeScreen(props: {
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+  updateOffer: (o: {
+    offer: Offer;
+    image: string;
+    prices: Price[];
+    currentPrice: Price;
+  }) => void;
 }) {
   const [offerList, setOfferList] = React.useState<Offer[]>([]);
   React.useEffect(() => {
@@ -30,7 +36,9 @@ export default function HomeScreen(props: {
         <FlatList
           style={styles.product_container}
           data={offerList}
-          renderItem={({ item }) => <OfferCard offer={item} />}
+          renderItem={({ item }) => (
+            <OfferCard offer={item} updateOffer={props.updateOffer} />
+          )}
           keyExtractor={(item) => item.id}
         />
       </SafeAreaView>
