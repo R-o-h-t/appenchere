@@ -4,7 +4,11 @@ import { ModelInit, MutableModel, PersistentModelConstructor } from "@aws-amplif
 
 
 
-type CategoryMetaData = {
+type PriceMetaData = {
+  readOnlyFields: 'createdAt' | 'updatedAt';
+}
+
+type OfferMetaData = {
   readOnlyFields: 'createdAt' | 'updatedAt';
 }
 
@@ -12,7 +16,7 @@ type ProductMetaData = {
   readOnlyFields: 'createdAt' | 'updatedAt';
 }
 
-type PricesMetaData = {
+type CategoryMetaData = {
   readOnlyFields: 'createdAt' | 'updatedAt';
 }
 
@@ -20,65 +24,66 @@ type UserMetaData = {
   readOnlyFields: 'createdAt' | 'updatedAt';
 }
 
-type ProductCategoryMetaData = {
-  readOnlyFields: 'createdAt' | 'updatedAt';
+export declare class Price {
+  readonly id: string;
+  readonly value: number;
+  readonly userID: string;
+  readonly offerID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  constructor(init: ModelInit<Price, PriceMetaData>);
+  static copyOf(source: Price, mutator: (draft: MutableModel<Price, PriceMetaData>) => MutableModel<Price, PriceMetaData> | void): Price;
 }
 
-export declare class Category {
+export declare class Offer {
   readonly id: string;
-  readonly Products?: (ProductCategory | null)[];
-  readonly label?: string;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
-  constructor(init: ModelInit<Category, CategoryMetaData>);
-  static copyOf(source: Category, mutator: (draft: MutableModel<Category, CategoryMetaData>) => MutableModel<Category, CategoryMetaData> | void): Category;
+  readonly startAt: string;
+  readonly endAt: string;
+  readonly userID: string;
+  readonly prices?: (Price | null)[] | null;
+  readonly product?: Product | null;
+  readonly isPublished?: boolean | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly offerProductId?: string | null;
+  constructor(init: ModelInit<Offer, OfferMetaData>);
+  static copyOf(source: Offer, mutator: (draft: MutableModel<Offer, OfferMetaData>) => MutableModel<Offer, OfferMetaData> | void): Offer;
 }
 
 export declare class Product {
   readonly id: string;
-  readonly label?: string;
-  readonly userID?: string;
-  readonly file?: string;
-  readonly info?: string;
-  readonly startedAt?: string;
-  readonly endedAt?: string;
-  readonly categories?: (ProductCategory | null)[];
-  readonly StartedPrice?: number;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly label: string;
+  readonly file: string;
+  readonly description: string;
+  readonly userID: string;
+  readonly categoryID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<Product, ProductMetaData>);
   static copyOf(source: Product, mutator: (draft: MutableModel<Product, ProductMetaData>) => MutableModel<Product, ProductMetaData> | void): Product;
 }
 
-export declare class Prices {
+export declare class Category {
   readonly id: string;
-  readonly value?: number;
-  readonly Product?: Product;
-  readonly User?: User;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
-  readonly pricesProductId?: string;
-  readonly pricesUserId?: string;
-  constructor(init: ModelInit<Prices, PricesMetaData>);
-  static copyOf(source: Prices, mutator: (draft: MutableModel<Prices, PricesMetaData>) => MutableModel<Prices, PricesMetaData> | void): Prices;
+  readonly label: string;
+  readonly products?: (Product | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  constructor(init: ModelInit<Category, CategoryMetaData>);
+  static copyOf(source: Category, mutator: (draft: MutableModel<Category, CategoryMetaData>) => MutableModel<Category, CategoryMetaData> | void): Category;
 }
 
 export declare class User {
   readonly id: string;
-  readonly Products?: (Product | null)[];
-  readonly AuthId?: string;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly firstname: string;
+  readonly lastname: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly products?: (Product | null)[] | null;
+  readonly prices?: (Price | null)[] | null;
+  readonly offers?: (Offer | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<User, UserMetaData>);
   static copyOf(source: User, mutator: (draft: MutableModel<User, UserMetaData>) => MutableModel<User, UserMetaData> | void): User;
-}
-
-export declare class ProductCategory {
-  readonly id: string;
-  readonly category: Category;
-  readonly product: Product;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
-  constructor(init: ModelInit<ProductCategory, ProductCategoryMetaData>);
-  static copyOf(source: ProductCategory, mutator: (draft: MutableModel<ProductCategory, ProductCategoryMetaData>) => MutableModel<ProductCategory, ProductCategoryMetaData> | void): ProductCategory;
 }
