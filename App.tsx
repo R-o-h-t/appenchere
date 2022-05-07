@@ -1,12 +1,12 @@
 // @ts-ignore
 import { Amplify, DataStore, Hub } from "aws-amplify";
-// @ts-ignore
 import { StatusBar } from "expo-status-bar";
 import "intl";
 import "intl/locale-data/jsonp/en";
 import _ from "lodash";
 import React from "react";
 import { LogBox, Text } from "react-native";
+import { Provider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import awsExport from "./aws-exports";
 import useCachedResources from "./hooks/useCachedResources";
@@ -41,10 +41,12 @@ const App = () => {
     return <Text>Loading...</Text>;
   } else {
     return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </SafeAreaProvider>
+      <Provider>
+        <SafeAreaProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar />
+        </SafeAreaProvider>
+      </Provider>
     );
   }
 };

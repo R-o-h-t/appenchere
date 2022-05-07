@@ -10,9 +10,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
+import { Credentials } from "../contexts/credencialContext";
 import { ConnectionStackParamList } from "../types";
 
 export default function Reset(props: {
+  updateCredentials: (c: Credentials) => void;
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
   const route = useRoute<RouteProp<ConnectionStackParamList, "Reset">>();
@@ -91,7 +93,7 @@ export default function Reset(props: {
         )}
         <View style={styles.footerButtonContainer}>
           <AppButton title="Login" onPress={resetPassword} />
-          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <TouchableOpacity onPress={() => navigation.navigate("SignUp", {})}>
             <Text style={styles.signUpButtonText}>
               Don't have an account? Sign Up
             </Text>

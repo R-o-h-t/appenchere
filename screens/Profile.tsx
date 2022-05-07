@@ -1,38 +1,15 @@
-import { Auth } from "aws-amplify";
-import React, { useEffect, useState } from "react";
-
-import { StyleSheet, View, Text, SafeAreaView } from "react-native";
-import { Avatar, Caption, Title, TouchableRipple } from "react-native-paper";
+import { NavigationProp, useNavigation } from "@react-navigation/core";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Avatar, Title, TouchableRipple } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { DataStore } from "@aws-amplify/datastore";
-import { User } from "../models";
+import useAuthenticatedUser from "../hooks/useAuthenticatedUser";
+import { ProfileStackParamList } from "../types";
 
-export default function ProfileScreen(props: {
-  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
-}) {
-  const [user, setUser] = useState<any>();
-
-  useEffect(() => {
-    Auth.currentAuthenticatedUser().then((u) => setUser(u));
-  }, []);
-
-  const [profile, setProfile] = useState<User>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      const subscription = DataStore.observeQuery(User, (u) =>
-        u.email("eq", user.attributes.email)
-      ).subscribe(({ items }) => {
-        setProfile(items[0]);
-        setIsLoading(false);
-      });
-
-      return () => subscription.unsubscribe();
-    }
-  }, [user]);
-
-  if (isLoading) {
+export default function ProfileScreen() {
+  const user = useAuthenticatedUser();
+  const navigation =
+    useNavigation<NavigationProp<ProfileStackParamList, "Profile">>();
+  if (user === undefined) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
@@ -60,7 +37,7 @@ export default function ProfileScreen(props: {
                   color: "#777777",
                 },
               ]}
-            >{`${profile?.firstname} ${profile?.lastname}`}</Title>
+            >{`${user.firstname} ${user.lastname}`}</Title>
           </View>
         </View>
       </View>
@@ -74,23 +51,19 @@ export default function ProfileScreen(props: {
         </View>
         <View style={styles.row}>
           <Icon name="phone" color="#777777" size={20} />
-          <Text style={{ color: "#777777", marginLeft: 20 }}>
-            {profile?.phone}
-          </Text>
+          <Text style={{ color: "#777777", marginLeft: 20 }}>{user.phone}</Text>
         </View>
         <View style={styles.row}>
           <Icon name="email" color="#777777" size={20} />
-          <Text style={{ color: "#777777", marginLeft: 20 }}>
-            {profile?.email}
-          </Text>
+          <Text style={{ color: "#777777", marginLeft: 20 }}>{user.email}</Text>
         </View>
       </View>
 
       <View style={styles.menuWrapper}>
-        <TouchableRipple onPress={() => {}}>
+        <TouchableRipple onPress={() => navigation.navigate("CreateOffer")}>
           <View style={styles.menuItem}>
             <Icon name="heart-outline" color="tomato" size={25} />
-            <Text style={styles.menuItemText}>Vos Offres</Text>
+            <Text style={styles.menuItemText}>Mes Images</Text>
           </View>
         </TouchableRipple>
         <TouchableRipple onPress={() => {}}>

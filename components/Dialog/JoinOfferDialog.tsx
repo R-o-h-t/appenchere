@@ -1,14 +1,13 @@
-import { Auth, DataStore } from "aws-amplify";
+import { DataStore } from "aws-amplify";
 import * as React from "react";
 import {
   Button,
   Dialog,
   Paragraph,
   Portal,
-  Provider,
   TextInput,
 } from "react-native-paper";
-import { User } from "../../models";
+import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
 import { Offer, Price } from "../../models";
 
 interface Props {
@@ -27,6 +26,7 @@ const JoinOfferDialog: React.FC<Props> = ({
   currentPrice,
 }) => {
   const [amount, setAmount] = React.useState(0);
+  const user = useAuthenticatedUser();
 
   React.useEffect(() => {
     if (currentPrice) {
@@ -39,48 +39,47 @@ const JoinOfferDialog: React.FC<Props> = ({
       alert("le montant doit être supérieur au prix de l'offre");
     }
     if (offer && amount > 0) {
-      Auth.currentAuthenticatedUser()
-        .then((user) => {
-          console.log(user.attributes["custom:id"]);
-          DataStore.save(
-            new Price({
-              value: amount,
-              userID: user.attributes["custom:id"],
-              offerID: offer.id,
-            })
-          );
-        })
-        .then((item) => {
-          console.log(item);
-          onValidate();
-        })
-        .catch((e) => console.error(e));
+      if (user !== undefined) {
+        DataStore.save(
+          new Price({
+            value: amount,
+            userID: user.id,
+            offerID: offer.id,
+          })
+        )
+          .then(() => {
+            onValidate();
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      } else {
+        alert("Veuillez vous connecter pour participer à l'offre");
+      }
     }
   };
   return (
-    <Provider>
-      <Portal>
-        <Dialog visible={visible} onDismiss={onCancel}>
-          <Dialog.Title onPressIn={() => {}} onPressOut={() => {}}>
-            {offer ? offer.product?.label : "Offer"}
-          </Dialog.Title>
-          <Dialog.Content>
-            <Paragraph>Selectionner le montant desiré</Paragraph>
-            <TextInput
-              label="Montant"
-              value={amount.toString()}
-              onChangeText={(value) => setAmount(parseInt(value))}
-              autoComplete="email"
-              keyboardType="numeric"
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={onCancel}>Annuler</Button>
-            <Button onPress={onContinue}>Valider</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </Provider>
+    <Portal>
+      <Dialog visible={visible} onDismiss={onCancel}>
+        <Dialog.Title onPressIn={() => {}} onPressOut={() => {}}>
+          {offer ? offer.product?.label : "Offer"}
+        </Dialog.Title>
+        <Dialog.Content>
+          <Paragraph>Selectionner le montant desiré</Paragraph>
+          <TextInput
+            label="Montant"
+            value={amount.toString()}
+            onChangeText={(value) => setAmount(parseInt(value))}
+            autoComplete="email"
+            keyboardType="numeric"
+          />
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button onPress={onCancel}>Annuler</Button>
+          <Button onPress={onContinue}>Valider</Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
   );
 };
 

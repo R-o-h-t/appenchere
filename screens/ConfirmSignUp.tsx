@@ -1,14 +1,23 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Auth } from "aws-amplify";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { ConnectionStackParamList } from "../types";
+import credentialContext, { Credentials } from "../contexts/credencialContext";
 
-export default function ConfirmSignUp() {
+export default function ConfirmSignUp(props: {
+  updateCredentials: (c: Credentials) => void;
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   const [username, setUsername] = useState("");
   const [authCode, setAuthCode] = useState("");
   const navigation =
@@ -16,9 +25,15 @@ export default function ConfirmSignUp() {
 
   async function confirmSignUp() {
     Auth.confirmSignUp(username, authCode).then(() =>
-      navigation.navigate("SignIn", { email: username })
+      props.updateAuthState("loggedIn")
     );
   }
+  const email = useContext(credentialContext).email;
+  useEffect(() => {
+    if (username.length === 0 && email && email.length > 0) {
+      setUsername(email);
+    }
+  }, [email]);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>

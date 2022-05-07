@@ -10,11 +10,6 @@
       "StackName": "amplify-appenchere-staging-104507",
       "StackId": "arn:aws:cloudformation:eu-west-3:819874279020:stack/amplify-appenchere-staging-104507/562b8380-9303-11ec-a462-0a2cb1a42c3a",
       "AmplifyAppId": "d2e49fohjpnfw2"
-    },
-    "categories": {
-      "auth": {
-        "appenchere": {}
-      }
     }
   }
 }

@@ -15,10 +15,7 @@ export const Chrono: React.FC<Props> = ({ begin, end, styles, format }) => {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      setTimer((lastTimerCount: number) => {
-        lastTimerCount <= 1 && clearInterval(interval);
-        return lastTimerCount + 1;
-      });
+      setTimer(DateTime.now().toSeconds());
     }, 1000);
     return () => clearInterval(interval);
   }, []);

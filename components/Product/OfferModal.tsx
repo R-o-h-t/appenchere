@@ -1,7 +1,7 @@
-import { RouteProp, useRoute } from "@react-navigation/native";
-import { DataStore, Auth } from "aws-amplify";
-import React, { useState } from "react";
+import { DataStore } from "aws-amplify";
+import React, { useContext, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   SafeAreaView,
   ScrollView,
@@ -10,26 +10,23 @@ import {
   View,
 } from "react-native";
 import { FAB } from "react-native-paper";
-import { Price, User } from "../../models";
-import { ModalStackParamList } from "../../types";
+import offerContext from "../../contexts/offerContext";
+import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
+import { Product, User } from "../../models";
 import JoinOfferDialog from "../Dialog/JoinOfferDialog";
 
 export default function OfferModal() {
-  const route = useRoute<RouteProp<ModalStackParamList, "Product">>();
-  const { offer, image, prices } = route.params;
+  const { offer, image, prices, currentPrice } = useContext(offerContext);
 
-  const [currentPrice, setCurrentPrice] = useState<Price>();
   const [currentUser, setCurrentUser] = useState<User>();
   const [author, setAuthor] = useState<User>();
+  const user = useAuthenticatedUser();
 
-  const [connectedUser, setConnectedUser] = useState<any>();
+  const [product, setProduct] = useState<Product>();
 
   const [joinOfferDialogVisible, setJoinOfferDialogVisible] = useState(false);
 
   React.useEffect(() => {
-    Auth.currentAuthenticatedUser().then((u) => {
-      setConnectedUser(u);
-    });
     if (offer) {
       if (offer.userID) {
         DataStore.query(User, offer.userID).then((u) => {
@@ -40,13 +37,14 @@ export default function OfferModal() {
   }, [offer]);
 
   React.useEffect(() => {
-    if (prices)
-      setCurrentPrice(
-        prices.reduce((prev, current) => {
-          return !current || prev!.value > current.value ? prev : current;
-        }, new Price({ value: 0, userID: "", offerID: "" })) || undefined
+    if (offer && offer.offerProductId !== undefined) {
+      DataStore.query(Product, (p) => p.id("eq", offer.offerProductId!)).then(
+        (item) => {
+          setProduct(item[0]);
+        }
       );
-  }, [prices]);
+    }
+  }, [offer]);
 
   React.useEffect(() => {
     if (currentPrice) {
@@ -55,6 +53,10 @@ export default function OfferModal() {
       });
     }
   }, [currentPrice]);
+
+  if (user === undefined) {
+    return <ActivityIndicator animating={true} color="tomato" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -93,18 +95,30 @@ export default function OfferModal() {
         </View>
         <ScrollView style={styles.descBodyView}>
           <Text style={styles.descBodyText}>
-            {offer && offer.product ? offer?.product.description : "..."}
+            {offer && product ? product.description : "..."}
           </Text>
         </ScrollView>
       </SafeAreaView>
-      {currentUser && connectedUser.username === currentUser.email ? (
-        <FAB
-          style={styles.fab}
-          accessibilityLabel="participer a l'offre"
-          icon="check"
-          label="Vous êtes premier sur cette offre"
-          theme={{ colors: { accent: "tomato" } }}
-        />
+      {currentUser && user && user.email === currentUser.email ? (
+        <>
+          {author && author.email === user.email ? (
+            <FAB
+              style={styles.fab}
+              accessibilityLabel="participer a l'offre"
+              icon="alert-circle-outline"
+              label="Vous ne pouvez pas encherir sur cette offre"
+              theme={{ colors: { accent: "tomato" } }}
+            />
+          ) : (
+            <FAB
+              style={styles.fab}
+              accessibilityLabel="participer a l'offre"
+              icon="check"
+              label="Vous êtes premier sur cette offre"
+              theme={{ colors: { accent: "tomato" } }}
+            />
+          )}
+        </>
       ) : (
         <>
           <FAB

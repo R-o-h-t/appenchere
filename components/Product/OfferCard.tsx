@@ -3,23 +3,31 @@ import { DataStore, Storage } from "aws-amplify";
 import { DateTime } from "luxon";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Offer, Price } from "../../models";
+import { ActivityIndicator } from "react-native-paper";
+import offerContext from "../../contexts/offerContext";
+import { Offer, Price, Product } from "../../models";
 import { Chrono } from "./Chrono";
 
 interface Props {
+  product: Product;
   offer: Offer;
+  updateOffer: (o: {
+    offer: Offer;
+    image: string;
+    prices: Price[];
+    currentPrice: Price;
+  }) => void;
 }
 
-const OfferCard: React.FC<Props> = ({ offer }) => {
+const OfferCard: React.FC<Props> = ({ offer, updateOffer, product }) => {
   const [image, setImage] = React.useState("");
   const [currentPrice, setCurrentPrice] = React.useState<Price>();
   const [prices, setPrices] = React.useState<Price[]>();
-
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    if (offer.product && offer.product.file) {
-      Storage.get(offer.product.file, {
+    if (product) {
+      Storage.get(product.file, {
         level: "public",
       }).then(
         (i) => {
@@ -28,15 +36,16 @@ const OfferCard: React.FC<Props> = ({ offer }) => {
         (e) => console.error(e)
       );
     }
-  }, [offer]);
+  }, [product]);
 
   React.useEffect(() => {
     if (offer.prices) {
       setPrices(offer.prices.filter((p) => !!p) as Price[]);
     } else {
-      DataStore.query(Price, (p) => p.offerID("eq", offer.id)).then((p) =>
-        setPrices(p)
-      );
+      const sub = DataStore.observeQuery(Price, (p) =>
+        p.offerID("eq", offer.id)
+      ).subscribe(({ items }) => setPrices(items));
+      return () => sub.unsubscribe();
     }
   }, [offer]);
 
@@ -50,68 +59,111 @@ const OfferCard: React.FC<Props> = ({ offer }) => {
     }
   }, [prices]);
 
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        navigation.navigate("Modal", {
-          screen: "Product",
-          params: {
-            offer,
-            image,
-            prices,
-          },
-        });
-      }}
-      style={styles.container}
-    >
-      <View style={styles.img}>
-        {image === "" ? (
-          <Text style={styles.priceText}>Loading...</Text>
-        ) : (
-          <Image
-            style={{
-              width: h,
-              height: h,
-              resizeMode: "contain",
-            }}
-            source={{ uri: image }}
-          />
-        )}
+  if (
+    currentPrice === undefined ||
+    prices === undefined ||
+    image === "" ||
+    offer === undefined ||
+    product === undefined
+  ) {
+    return (
+      <View style={[styles.container, { alignItems: "center" }]}>
+        <ActivityIndicator animating={true} color="tomato" />
       </View>
-      <View style={styles.content}>
-        <View style={styles.upperContent}>
-          <View style={styles.label}>
-            <Text style={styles.titleText}>
-              {offer.product ? offer.product.label : ""}
-            </Text>
+    );
+  } else {
+    return (
+      <offerContext.Provider value={{ offer, currentPrice, prices, image }}>
+        <TouchableOpacity
+          onPress={() => {
+            updateOffer({ offer, currentPrice, prices, image });
+            navigation.navigate("Modal", {
+              screen: "Product",
+              params: {},
+            });
+          }}
+          style={styles.container}
+        >
+          <View style={styles.img}>
+            <Image
+              style={{
+                width: h,
+                height: h,
+                resizeMode: "contain",
+              }}
+              source={{ uri: image }}
+            />
           </View>
-        </View>
-        <View style={styles.bottomContent}>
-          <View style={styles.offer}>
-            <Text style={styles.priceText}>{`${
-              currentPrice ? currentPrice.value : 0
-            }€`}</Text>
+          <View style={styles.content}>
+            <View style={styles.upperContent}>
+              <View style={styles.label}>
+                <Text style={styles.titleText}>
+                  {product ? product.label : ""}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.bottomContent}>
+              <View style={styles.offer}>
+                <Text style={styles.priceText}>{`${
+                  currentPrice ? currentPrice.value : 0
+                }€`}</Text>
+              </View>
+              <Chrono
+                end={DateTime.fromISO(offer.startAt)}
+                begin={DateTime.fromISO(offer.endAt)}
+                styles={StyleSheet.create({
+                  container: {
+                    marginVertical: "auto",
+                    marginHorizontal: "auto",
+                  },
+                  text: {
+                    color: "white",
+                  },
+                })}
+              />
+            </View>
           </View>
-          <Chrono
-            end={DateTime.fromISO(offer.endAt)}
-            begin={DateTime.fromISO(offer.startAt)}
-            styles={StyleSheet.create({
-              container: {
-                marginVertical: "auto",
-                marginHorizontal: "auto",
-              },
-              text: {
-                color: "white",
-              },
-            })}
-          />
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+        </TouchableOpacity>
+      </offerContext.Provider>
+    );
+  }
 };
 
-export default OfferCard;
+interface Props2 {
+  offer: Offer;
+  updateOffer: (o: {
+    offer: Offer;
+    image: string;
+    prices: Price[];
+    currentPrice: Price;
+  }) => void;
+  category: string;
+}
+
+const FilterCard: React.FC<Props2> = ({ offer, updateOffer, category }) => {
+  const [product, setProduct] = React.useState<Product>();
+
+  React.useEffect(() => {
+    if (offer && offer.offerProductId !== undefined) {
+      DataStore.query(Product, (p) => p.id("eq", offer.offerProductId!)).then(
+        (item) => {
+          setProduct(item[0]);
+        }
+      );
+    }
+  }, [offer]);
+  if (product) {
+    if (product.categoryID === category) {
+      return (
+        <OfferCard offer={offer} updateOffer={updateOffer} product={product} />
+      );
+    }
+    return null;
+  }
+  return null;
+};
+
+export default FilterCard;
 
 const h = 125;
 

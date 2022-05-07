@@ -10,9 +10,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
+import { Credentials } from "../contexts/credencialContext";
 import { ConnectionStackParamList } from "../types";
 
 export default function SignIn(props: {
+  updateCredentials: (c: Credentials) => void;
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
   const navigation =
