@@ -5,7 +5,7 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import { Auth, DataStore } from "aws-amplify";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -18,10 +18,14 @@ import { Badge, Dialog, FAB, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
+import credentialContext, { Credentials } from "../contexts/credencialContext";
 import { User } from "../models";
 import { ConnectionStackParamList } from "../types";
 
-export default function SignUp() {
+export default function SignUp(props: {
+  updateCredentials: (c: Credentials) => void;
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   /**
    * Auth
    * username = email
@@ -41,13 +45,12 @@ export default function SignUp() {
 
   const [showErrors, setShowErrors] = useState(false);
 
-  const route = useRoute<RouteProp<ConnectionStackParamList, "SignUp">>();
-
+  const email = useContext(credentialContext).email;
   useEffect(() => {
-    if (route.params && route.params.email && route.params.email.length > 0) {
-      setUsername(route.params.email);
+    if (username.length === 0 && email && email.length > 0) {
+      setUsername(email);
     }
-  }, []);
+  }, [email]);
 
   useEffect(() => {
     const errors: string[] = [];
@@ -92,9 +95,8 @@ export default function SignUp() {
       })
         .then(({ user }) => {
           console.log("Successfully signed up!");
-          navigation.navigate("ConfirmSignUp", {
-            email: username,
-          });
+          props.updateCredentials({ email: username });
+          navigation.navigate("ConfirmSignUp", {});
           DataStore.save(
             new User({
               firstname: firstName,

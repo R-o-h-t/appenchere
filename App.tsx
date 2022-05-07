@@ -37,7 +37,6 @@ const App = () => {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
-
   if (!isLoadingComplete) {
     return <Text>Loading...</Text>;
   } else {
@@ -53,4 +52,3 @@ const App = () => {
 };
 
 export default App;
-

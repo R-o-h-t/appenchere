@@ -9,6 +9,7 @@ import { Offer, Price, Product } from "../../models";
 import { Chrono } from "./Chrono";
 
 interface Props {
+  product: Product;
   offer: Offer;
   updateOffer: (o: {
     offer: Offer;
@@ -18,22 +19,11 @@ interface Props {
   }) => void;
 }
 
-const OfferCard: React.FC<Props> = ({ offer, updateOffer }) => {
+const OfferCard: React.FC<Props> = ({ offer, updateOffer, product }) => {
   const [image, setImage] = React.useState("");
   const [currentPrice, setCurrentPrice] = React.useState<Price>();
   const [prices, setPrices] = React.useState<Price[]>();
-  const [product, setProduct] = React.useState<Product>();
   const navigation = useNavigation();
-
-  React.useEffect(() => {
-    if (offer && offer.offerProductId !== undefined) {
-      DataStore.query(Product, (p) => p.id("eq", offer.offerProductId!)).then(
-        (item) => {
-          setProduct(item[0]);
-        }
-      );
-    }
-  }, [offer]);
 
   React.useEffect(() => {
     if (product) {
@@ -139,7 +129,41 @@ const OfferCard: React.FC<Props> = ({ offer, updateOffer }) => {
   }
 };
 
-export default OfferCard;
+interface Props2 {
+  offer: Offer;
+  updateOffer: (o: {
+    offer: Offer;
+    image: string;
+    prices: Price[];
+    currentPrice: Price;
+  }) => void;
+  category: string;
+}
+
+const FilterCard: React.FC<Props2> = ({ offer, updateOffer, category }) => {
+  const [product, setProduct] = React.useState<Product>();
+
+  React.useEffect(() => {
+    if (offer && offer.offerProductId !== undefined) {
+      DataStore.query(Product, (p) => p.id("eq", offer.offerProductId!)).then(
+        (item) => {
+          setProduct(item[0]);
+        }
+      );
+    }
+  }, [offer]);
+  if (product) {
+    if (product.categoryID === category) {
+      return (
+        <OfferCard offer={offer} updateOffer={updateOffer} product={product} />
+      );
+    }
+    return null;
+  }
+  return null;
+};
+
+export default FilterCard;
 
 const h = 125;
 

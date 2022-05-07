@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Auth } from "aws-amplify";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,8 +12,12 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import { ConnectionStackParamList } from "../types";
+import credentialContext, { Credentials } from "../contexts/credencialContext";
 
-export default function ConfirmSignUp() {
+export default function ConfirmSignUp(props: {
+  updateCredentials: (c: Credentials) => void;
+  updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
+}) {
   const [username, setUsername] = useState("");
   const [authCode, setAuthCode] = useState("");
   const navigation =
@@ -21,17 +25,15 @@ export default function ConfirmSignUp() {
 
   async function confirmSignUp() {
     Auth.confirmSignUp(username, authCode).then(() =>
-      navigation.navigate("SignIn", { email: username })
+      props.updateAuthState("loggedIn")
     );
   }
-
-  const route = useRoute<RouteProp<ConnectionStackParamList, "SignUp">>();
-
+  const email = useContext(credentialContext).email;
   useEffect(() => {
-    if (route.params && route.params.email && route.params.email.length > 0) {
-      setUsername(route.params.email);
+    if (username.length === 0 && email && email.length > 0) {
+      setUsername(email);
     }
-  }, []);
+  }, [email]);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>

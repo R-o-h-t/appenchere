@@ -29,8 +29,8 @@ export declare class Price {
   readonly value: number;
   readonly userID: string;
   readonly offerID: string;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<Price, PriceMetaData>);
   static copyOf(source: Price, mutator: (draft: MutableModel<Price, PriceMetaData>) => MutableModel<Price, PriceMetaData> | void): Price;
 }
@@ -40,12 +40,12 @@ export declare class Offer {
   readonly startAt: string;
   readonly endAt: string;
   readonly userID: string;
-  readonly prices?: (Price | null)[];
-  readonly product?: Product;
-  readonly isPublished?: boolean;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
-  readonly offerProductId?: string;
+  readonly prices?: (Price | null)[] | null;
+  readonly product?: Product | null;
+  readonly isPublished?: boolean | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly offerProductId?: string | null;
   constructor(init: ModelInit<Offer, OfferMetaData>);
   static copyOf(source: Offer, mutator: (draft: MutableModel<Offer, OfferMetaData>) => MutableModel<Offer, OfferMetaData> | void): Offer;
 }
@@ -57,8 +57,8 @@ export declare class Product {
   readonly description: string;
   readonly userID: string;
   readonly categoryID: string;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<Product, ProductMetaData>);
   static copyOf(source: Product, mutator: (draft: MutableModel<Product, ProductMetaData>) => MutableModel<Product, ProductMetaData> | void): Product;
 }
@@ -66,9 +66,9 @@ export declare class Product {
 export declare class Category {
   readonly id: string;
   readonly label: string;
-  readonly products?: (Product | null)[];
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly products?: (Product | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<Category, CategoryMetaData>);
   static copyOf(source: Category, mutator: (draft: MutableModel<Category, CategoryMetaData>) => MutableModel<Category, CategoryMetaData> | void): Category;
 }
@@ -79,11 +79,11 @@ export declare class User {
   readonly lastname: string;
   readonly email: string;
   readonly phone: string;
-  readonly products?: (Product | null)[];
-  readonly prices?: (Price | null)[];
-  readonly offers?: (Offer | null)[];
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
+  readonly products?: (Product | null)[] | null;
+  readonly prices?: (Price | null)[] | null;
+  readonly offers?: (Offer | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   constructor(init: ModelInit<User, UserMetaData>);
   static copyOf(source: User, mutator: (draft: MutableModel<User, UserMetaData>) => MutableModel<User, UserMetaData> | void): User;
 }

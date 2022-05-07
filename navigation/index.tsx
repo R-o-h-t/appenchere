@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ColorSchemeName, View } from "react-native";
 import OfferModal from "../components/Product/OfferModal";
 import Colors from "../constants/Colors";
+import credentialContext, { Credentials } from "../contexts/credencialContext";
 import offerContext from "../contexts/offerContext";
 import productContext from "../contexts/productContext";
 import userContext from "../contexts/userContext";
@@ -66,6 +67,8 @@ export default function Navigation({
   const [user, setUser] = useState<User>();
   const [auth, setAuth] = useState<any>();
 
+  const [credentials, setCredentials] = useState<Credentials>({});
+
   useEffect(() => {
     if (auth) {
       const subscription = DataStore.observeQuery(User, (u) =>
@@ -110,7 +113,12 @@ export default function Navigation({
         </userContext.Provider>
       )}
       {isUserLoggedIn === "loggedOut" && (
-        <AuthenticationNavigator updateAuthState={setUserLoggedIn} />
+        <credentialContext.Provider value={credentials}>
+          <AuthenticationNavigator
+            updateCredentials={setCredentials}
+            updateAuthState={setUserLoggedIn}
+          />
+        </credentialContext.Provider>
       )}
     </NavigationContainer>
   );
@@ -336,6 +344,7 @@ function TabBarIcon(props: {
 const AuthenticationStack =
   createNativeStackNavigator<ConnectionStackParamList>();
 function AuthenticationNavigator(props: {
+  updateCredentials: (c: Credentials) => void;
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
   return (
@@ -346,21 +355,34 @@ function AuthenticationNavigator(props: {
     >
       <AuthenticationStack.Screen name="SignIn">
         {(screenProps) => (
-          <SignIn {...screenProps} updateAuthState={props.updateAuthState} />
+          <SignIn
+            {...screenProps}
+            updateCredentials={props.updateCredentials}
+            updateAuthState={props.updateAuthState}
+          />
         )}
       </AuthenticationStack.Screen>
 
       <AuthenticationStack.Screen name="Reset">
         {(screenProps) => (
-          <Reset {...screenProps} updateAuthState={props.updateAuthState} />
+          <Reset
+            {...screenProps}
+            updateCredentials={props.updateCredentials}
+            updateAuthState={props.updateAuthState}
+          />
         )}
       </AuthenticationStack.Screen>
 
       <AuthenticationStack.Screen name="SignUp" component={SignUp} />
-      <AuthenticationStack.Screen
-        name="ConfirmSignUp"
-        component={ConfirmSignUp}
-      />
+      <AuthenticationStack.Screen name="ConfirmSignUp">
+        {(screenProps) => (
+          <ConfirmSignUp
+            {...screenProps}
+            updateCredentials={props.updateCredentials}
+            updateAuthState={props.updateAuthState}
+          />
+        )}
+      </AuthenticationStack.Screen>
     </AuthenticationStack.Navigator>
   );
 }
