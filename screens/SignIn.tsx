@@ -1,16 +1,25 @@
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { Auth } from "aws-amplify";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
+import { Credentials } from "../contexts/credencialContext";
 import { ConnectionStackParamList } from "../types";
 
 export default function SignIn(props: {
+  updateCredentials: (c: Credentials) => void;
   updateAuthState: (s: "initializing" | "loggedIn" | "loggedOut") => void;
 }) {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NavigationProp<ConnectionStackParamList, "SignIn">>();
+
   const route = useRoute<RouteProp<ConnectionStackParamList, "SignIn">>();
 
   const [email, setEmail] = useState("");
@@ -56,23 +65,25 @@ export default function SignIn(props: {
         {errorMessage.length > 0 && (
           <Text style={styles.errorMessageText}>{errorMessage}</Text>
         )}
-        <View style={styles.footerButtonContainer}>
-          <AppButton title="Login" onPress={signIn} />
-          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+      </View>
+      <View style={styles.footerButtonContainer}>
+        <AppButton title="Login" onPress={signIn} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("SignUp", { email })}
+        >
+          <Text style={styles.signUpButtonText}>
+            Don't have an account? Sign Up
+          </Text>
+        </TouchableOpacity>
+        {errorMessage.length > 0 && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Reset", { email })}
+          >
             <Text style={styles.signUpButtonText}>
-              Don't have an account? Sign Up
+              Forgotten password ? Reset
             </Text>
           </TouchableOpacity>
-          {errorMessage.length > 0 && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Reset", { email })}
-            >
-              <Text style={styles.signUpButtonText}>
-                Forgotten password ? Reset
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -82,6 +93,7 @@ const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
     backgroundColor: "white",
+    paddingVertical: 100,
   },
   container: {
     flex: 1,
@@ -92,14 +104,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    color: "#202020",
+    color: "#808080",
     fontWeight: "500",
     marginVertical: 15,
   },
   footerButtonContainer: {
-    marginTop: "auto",
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
   },
   forgotPasswordButtonText: {
     color: "tomato",

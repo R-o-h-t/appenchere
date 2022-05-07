@@ -22,10 +22,12 @@
       "supportsTablet": true
     },
     "android": {
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "webmob.gp4.appencheres"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
